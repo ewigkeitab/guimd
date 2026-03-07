@@ -1,0 +1,11 @@
+{
+    "menu.file": "檔案",
+    "menu.open": "開啟",
+    "menu.save": "儲存",
+    "menu.saveAs": "另存新檔",
+    "menu.new": "新增",
+    "menu.help": "說明",
+    "menu.about": "關於 Guimd",
+    "editor.placeholder": "在此開始輸入您的 Markdown...",
+    "status.saved": "檔案已儲存"
+}

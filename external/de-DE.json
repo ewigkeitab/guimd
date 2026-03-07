@@ -1,0 +1,11 @@
+{
+    "menu.file": "Datei",
+    "menu.open": "Öffnen",
+    "menu.save": "Speichern",
+    "menu.saveAs": "Speichern unter",
+    "menu.new": "Neu",
+    "menu.help": "Hilfe",
+    "menu.about": "Über Guimd",
+    "editor.placeholder": "Beginnen Sie hier mit der Eingabe Ihres Markdowns...",
+    "status.saved": "Datei gespeichert"
+}

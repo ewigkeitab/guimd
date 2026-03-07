@@ -1,0 +1,15 @@
+{
+  "editor": {
+    "fontFamily": "Inter, sans-serif",
+    "fontSize": 20,
+    "theme": "epaper"
+  },
+  "language": "en",
+  "layout": {
+    "primary": "editor",
+    "secondary": "sidebar",
+    "sidebarPosition": "right",
+    "sidebarWidth": 100,
+    "type": "split-pane"
+  }
+}

@@ -1,0 +1,1173 @@
+:root {
+  --primary-bg: #ffffff;
+  --secondary-bg: #f4f4f4;
+  --text-main: #333333;
+  --border-color: #dddddd;
+  --btn-bg: #e0e0e0;
+  --btn-hover: #d0d0d0;
+}
+
+.guimd-dark {
+  --primary-bg: #1e1e1e;
+  --secondary-bg: #252526;
+  --text-main: #d4d4d4;
+  --border-color: #3e3e42;
+  --btn-bg: #333333;
+  --btn-hover: #444444;
+}
+
+.guimd-electric-paper {
+  --primary-bg: #e8e4db;
+  --secondary-bg: #dfdbd2;
+  --text-main: #363636;
+  --border-color: #d1cdc4;
+  --btn-bg: #d6d2c9;
+  --btn-hover: #c9c5bd;
+}
+
+.guimd-config-error {
+  padding: 2rem;
+  color: red;
+}
+
+.guimd-error-boundary {
+  padding: 20px;
+  background: #300;
+  color: #f00;
+  height: 100vh;
+}
+
+.guimd-error-pre {
+  white-space: pre-wrap;
+}
+
+body {
+  margin: 0;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Oxygen", "Ubuntu", "Cantarell", "Fira Sans", "Droid Sans", "Helvetica Neue", sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+.guimd-layout {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  width: 100vw;
+  background-color: var(--primary-bg);
+  color: var(--text-main);
+  overflow: hidden;
+}
+
+.guimd-header {
+  display: flex;
+  align-items: center;
+  padding: 0.5rem 1rem;
+  background-color: var(--secondary-bg);
+  border-bottom: 1px solid var(--border-color);
+  height: 2rem;
+  box-sizing: border-box;
+}
+
+.guimd-brand {
+  font-weight: bold;
+  font-size: 1.2rem;
+  margin-right: 2rem;
+}
+
+.guimd-menu {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.guimd-workspace {
+  display: flex;
+  flex: 1;
+  overflow: hidden;
+}
+
+.layout-split-pane {
+  flex-direction: row;
+}
+
+.guimd-sidebar {
+  background-color: var(--secondary-bg);
+  border-right: 1px solid var(--border-color);
+  border-left: 1px solid var(--border-color);
+  display: flex;
+  flex-direction: column;
+  padding: 1rem;
+}
+
+.guimd-sidebar.no-padding {
+  padding: 0;
+}
+
+.guimd-sidebar-title {
+  font-weight: bold;
+  text-transform: uppercase;
+  font-size: 0.8rem;
+  color: #888;
+}
+
+.guimd-main-pane {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  text-align: start;
+  /* ensure it does not overflow its flex parent */
+  min-height: 0;
+  overflow: hidden;
+}
+
+.guimd-editor-container {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  box-sizing: border-box;
+  /* must not overflow — the inner scroll wrapper handles scrolling */
+  min-height: 0;
+  overflow: hidden;
+  background-color: var(--primary-bg);
+  color: var(--text-main);
+}
+
+/* The actual scrollable region inside the editor */
+.guimd-editor-scroll {
+  flex: 1;
+  overflow-y: auto;
+  scroll-behavior: smooth;
+  padding: 1.5rem 2rem 3rem;
+  box-sizing: border-box;
+}
+
+/* Standalone toolbar below menu bar */
+.guimd-toolbar {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  padding: 4px 8px;
+  background-color: var(--secondary-bg);
+  border-bottom: 1px solid var(--border-color);
+  flex-wrap: wrap;
+}
+
+.guimd-toolbar-sep {
+  display: inline-block;
+  width: 1px;
+  height: 20px;
+  background: var(--border-color);
+  margin: 0 4px;
+  align-self: center;
+}
+
+/* Icon toolbar button */
+.guimd-tbtn {
+  position: relative;
+  display: inline-flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  background: transparent;
+  border: none;
+  border-radius: 4px;
+  padding: 4px 6px;
+  cursor: pointer;
+  color: var(--text-main);
+  transition: background-color 0.15s;
+  gap: 2px;
+  min-width: 32px;
+}
+
+.guimd-tbtn:hover {
+  background-color: var(--btn-bg);
+}
+
+.guimd-tbtn.active {
+  background-color: var(--btn-hover);
+  color: #4caf50;
+}
+
+/* Hint text beneath icon */
+.guimd-tbtn-hint {
+  font-size: 9px;
+  line-height: 1;
+  white-space: nowrap;
+  opacity: 0.7;
+  pointer-events: none;
+  color: var(--text-main);
+}
+
+/* Legacy .guimd-btn kept for any other use */
+.guimd-btn {
+  background-color: var(--btn-bg);
+  color: var(--text-main);
+  border: none;
+  border-radius: 4px;
+  padding: 0.5rem 1rem;
+  cursor: pointer;
+  transition: background-color 0.2s;
+  font-size: 0.9rem;
+}
+
+.guimd-btn:hover {
+  background-color: var(--btn-hover);
+}
+
+/* also remove old guimd-editor-content overflow since guimd-editor-scroll handles it */
+.guimd-editor-content {
+  outline: none;
+}
+
+.guimd-editor-core {
+  outline: none;
+  min-height: 100%;
+  padding-bottom: 2rem;
+}
+
+/* MenuBar */
+.guimd-menubar {
+  display: flex;
+  gap: 0.25rem;
+  flex: 1;
+}
+
+.guimd-menu-root {
+  position: relative;
+}
+
+.guimd-menu-trigger {
+  background: transparent;
+  border: none;
+  color: var(--text-main);
+  padding: 0.3rem 0.75rem;
+  cursor: pointer;
+  border-radius: 4px;
+  font-size: 0.9rem;
+  transition: background-color 0.15s;
+}
+
+.guimd-menu-trigger:hover,
+.guimd-menu-trigger.active {
+  background-color: var(--btn-bg);
+}
+
+/* =====================
+   Search Highlight
+   ===================== */
+.guimd-search-match {
+  background-color: rgba(255, 235, 59, 0.4);
+  border-radius: 2px;
+}
+
+.guimd-search-match.active {
+  background-color: rgba(255, 152, 0, 0.6);
+  border-radius: 2px;
+  box-shadow: 0 0 0 1px rgba(255, 152, 0, 0.8);
+}
+
+/* =====================
+   Find / Replace Bar
+   ===================== */
+.guimd-find-replace-bar {
+  background-color: var(--secondary-bg);
+  border-bottom: 1px solid var(--border-color);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  display: flex;
+  flex-direction: column;
+  padding: 0.5rem 1rem;
+  /* Shrink appropriately */
+  flex-shrink: 0;
+}
+
+.guimd-fr-row {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  width: 100%;
+}
+
+.guimd-fr-row.replace-row {
+  margin-top: 0.4rem;
+}
+
+.guimd-fr-toggle {
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  color: var(--text-main);
+  opacity: 0.6;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 4px;
+  border-radius: 4px;
+  transition: opacity 0.2s, background 0.2s;
+}
+
+.guimd-fr-toggle:hover {
+  opacity: 1;
+  background: var(--btn-bg);
+}
+
+.guimd-fr-input-group {
+  display: flex;
+  align-items: center;
+  background: var(--btn-bg);
+  border: 1px solid var(--border-color);
+  border-radius: 4px;
+  padding: 0 0.4rem;
+  flex: 1;
+  transition: border-color 0.2s;
+}
+
+.guimd-fr-input-group:focus-within {
+  border-color: #4a9eff;
+}
+
+.guimd-fr-icon {
+  opacity: 0.5;
+  margin-right: 0.25rem;
+}
+
+.guimd-fr-input {
+  flex: 1;
+  background: transparent;
+  border: none;
+  color: var(--text-main);
+  font-size: 0.85rem;
+  padding: 0.3rem 0;
+  outline: none;
+  min-width: 150px;
+}
+
+.guimd-fr-count {
+  font-size: 0.75rem;
+  opacity: 0.5;
+  margin: 0 0.5rem;
+  white-space: nowrap;
+}
+
+.guimd-fr-option-btn {
+  background: transparent;
+  border: none;
+  border-radius: 3px;
+  cursor: pointer;
+  color: var(--text-main);
+  opacity: 0.5;
+  font-size: 0.75rem;
+  font-weight: bold;
+  padding: 2px 4px;
+  transition: opacity 0.2s, background 0.2s;
+}
+
+.guimd-fr-option-btn:hover {
+  background: var(--btn-hover);
+  opacity: 0.8;
+}
+
+.guimd-fr-option-btn.active {
+  opacity: 1;
+  background: var(--btn-hover);
+  color: #4caf50;
+}
+
+.guimd-fr-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+.guimd-fr-btn {
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  color: var(--text-main);
+  opacity: 0.6;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 4px;
+  border-radius: 4px;
+  transition: opacity 0.2s, background 0.2s;
+}
+
+.guimd-fr-btn:hover {
+  opacity: 1;
+  background: var(--btn-bg);
+}
+
+.guimd-fr-btn.close-btn {
+  margin-left: 0.5rem;
+}
+
+.guimd-fr-text-btn {
+  background: var(--btn-bg);
+  border: 1px solid var(--border-color);
+  cursor: pointer;
+  color: var(--text-main);
+  font-size: 0.8rem;
+  padding: 3px 8px;
+  border-radius: 4px;
+  transition: background 0.2s;
+}
+
+.guimd-fr-text-btn:hover {
+  background: var(--btn-hover);
+}
+
+.guimd-fr-spacer {
+  width: 22px;
+  /* Matches the toggle button width approximately */
+}
+
+.guimd-dropdown {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  min-width: 180px;
+  background-color: var(--secondary-bg);
+  border: 1px solid var(--border-color);
+  border-radius: 4px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+  z-index: 1000;
+  padding: 0.25rem 0;
+}
+
+.guimd-menu-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 2rem;
+  width: 100%;
+  text-align: left;
+  background: transparent;
+  border: none;
+  color: var(--text-main);
+  padding: 0.4rem 1rem;
+  cursor: pointer;
+  font-size: 0.9rem;
+  transition: background-color 0.15s;
+  box-sizing: border-box;
+}
+
+/* The tab character in label text becomes a spacer—
+   render the part after \t as a muted shortcut hint */
+.guimd-menu-item-shortcut {
+  font-size: 0.78rem;
+  opacity: 0.45;
+  white-space: nowrap;
+  margin-left: auto;
+}
+
+.guimd-menu-item:hover {
+  background-color: var(--btn-bg);
+}
+
+.guimd-menu-item:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.guimd-menu-separator {
+  height: 1px;
+  background-color: var(--border-color);
+  margin: 0.25rem 0;
+}
+
+.guimd-menu-item-parent {
+  position: relative;
+  width: 100%;
+}
+
+.guimd-submenu {
+  position: absolute;
+  top: -4px;
+  left: 100%;
+  min-width: 180px;
+  background-color: var(--secondary-bg);
+  border: 1px solid var(--border-color);
+  border-radius: 4px;
+  box-shadow: 4px 4px 12px rgba(0, 0, 0, 0.3);
+  z-index: 1001;
+  padding: 0.25rem 0;
+}
+
+.guimd-menu-submenu-arrow {
+  font-size: 8px;
+  opacity: 0.5;
+  margin-left: auto;
+}
+
+.guimd-header-info {
+  display: flex;
+  align-items: center;
+  margin-left: auto;
+  gap: 0.5rem;
+  overflow: hidden;
+}
+
+.guimd-reload-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  color: inherit;
+  opacity: 0.6;
+  padding: 4px;
+  border-radius: 4px;
+  transition: opacity 0.15s;
+}
+
+.guimd-reload-btn:hover {
+  opacity: 1;
+}
+
+/* File path in header */
+.guimd-filepath {
+  margin: 0;
+  margin-left: auto;
+  font-size: 0.75rem;
+  opacity: 0.6;
+  max-width: auto;
+  word-break: break-all;
+  text-align: right;
+  overflow-y: hidden;
+  cursor: pointer;
+}
+
+/* Permanent status bar */
+.guimd-statusbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 1rem;
+  height: 26px;
+  font-size: 0.75rem;
+  background-color: var(--secondary-bg);
+  border-top: 1px solid var(--border-color);
+  flex-shrink: 0;
+  user-select: none;
+}
+
+.guimd-status-left,
+.guimd-status-right {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.guimd-status-ready {
+  opacity: 0.45;
+}
+
+.guimd-status-notify {
+  color: #4caf50;
+  font-weight: 500;
+}
+
+.guimd-status-modified {
+  color: #e57373;
+  font-weight: 500;
+}
+
+.guimd-status-file {
+  opacity: 0.7;
+  max-width: 200px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  display: inline-block;
+  cursor: pointer;
+}
+
+.guimd-status-sep {
+  opacity: 0.3;
+}
+
+.guimd-status-structure-btn {
+  display: flex;
+  align-items: center;
+  cursor: pointer;
+  opacity: 0.8;
+  transition: opacity 0.15s;
+}
+
+.guimd-status-structure-btn:hover {
+
+  opacity: 1;
+}
+
+/* Structure Popup */
+.guimd-structure-popup {
+  position: absolute;
+  bottom: 26px;
+  /* slightly higher than statusbar */
+  right: 1rem;
+  width: 280px;
+  max-height: 400px;
+  background-color: var(--secondary-bg);
+  border: 1px solid var(--border-color);
+  border-radius: 6px 6px 0 0;
+  box-shadow: 0 -4px 12px rgba(0, 0, 0, 0.2);
+  display: flex;
+  flex-direction: column;
+  z-index: 2001;
+  overflow: hidden;
+}
+
+.guimd-structure-header {
+  padding: 0.5rem 0.75rem;
+  font-weight: 600;
+  font-size: 0.8rem;
+  border-bottom: 1px solid var(--border-color);
+  background-color: var(--secondary-bg);
+  color: var(--text-main);
+  user-select: none;
+}
+
+.guimd-structure-list {
+  flex: 1;
+  overflow-y: auto;
+  padding: 0.5rem 0;
+}
+
+.guimd-structure-empty {
+  padding: 1rem;
+  text-align: center;
+  opacity: 0.5;
+  font-size: 0.85rem;
+}
+
+.guimd-structure-item {
+  padding: 0.35rem 0.75rem;
+  font-size: 0.85rem;
+  color: var(--text-main);
+  opacity: 0.85;
+  cursor: pointer;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  user-select: none;
+  transition: background-color 0.15s, opacity 0.15s;
+  text-align: start;
+  background-color: var(--btn-bg);
+}
+
+.guimd-structure-item:hover {
+  background-color: var(--btn-hover);
+  color: red;
+  opacity: 1;
+}
+
+.guimd-structure-item.level-1 {
+  padding-left: 0.75rem;
+  font-weight: 600;
+}
+
+.guimd-structure-item.level-2 {
+  padding-left: 1.5rem;
+  font-weight: 500;
+}
+
+.guimd-structure-item.level-3 {
+  padding-left: 2.25rem;
+  font-size: 0.8rem;
+}
+
+.guimd-structure-item.level-4 {
+  padding-left: 3rem;
+  font-size: 0.8rem;
+  opacity: 0.7;
+}
+
+.guimd-structure-item.level-5 {
+  padding-left: 3.75rem;
+  font-size: 0.75rem;
+  opacity: 0.6;
+}
+
+.guimd-structure-item.level-6 {
+  padding-left: 4.5rem;
+  font-size: 0.75rem;
+  opacity: 0.5;
+}
+
+/* Dialog */
+.guimd-dialog-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.55);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 2000;
+
+}
+
+.guimd-dialog {
+  background-color: var(--secondary-bg);
+  border: 1px solid var(--border-color);
+  padding: 1rem;
+  border-radius: 8px;
+  min-width: 500px;
+  max-width: 640px;
+  max-height: 80vh;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+  display: flex;
+  flex-direction: column;
+  overflow-y: scroll;
+}
+
+
+.guimd-input-header {
+  display: flex;
+  align-items: start;
+  justify-content: space-between;
+  padding: 0.75rem 1rem;
+  border-bottom: 1px solid var(--border-color);
+}
+
+.guimd-dialog-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.75rem 1rem;
+  border-bottom: 1px solid var(--border-color);
+}
+
+.guimd-dialog-title {
+  font-weight: bold;
+  font-size: 1rem;
+}
+
+.guimd-input-title {
+  font-weight: bold;
+  font-size: 1rem;
+  text-align: start;
+  width: 100%;
+  word-wrap: break-word;
+}
+
+.guimd-dialog-close {
+  background: transparent;
+  border: none;
+  color: var(--text-main);
+  cursor: pointer;
+  font-size: 1rem;
+  opacity: 0.7;
+  transition: opacity 0.15s;
+}
+
+.guimd-dialog-close:hover {
+  opacity: 1;
+}
+
+.guimd-dialog-body {
+  padding: 1rem;
+  line-height: 1.6;
+}
+
+.guimd-dialog-body p {
+  margin: 0.25rem 0;
+}
+
+.guimd-dialog-footer {
+  display: flex;
+  justify-content: flex-end;
+  padding: 0.75rem 1rem;
+  border-top: 1px solid var(--border-color);
+  gap: 0.5rem;
+}
+
+/* Tiptap Node Styles */
+.guimd-editor-core blockquote {
+  border-left: 3px solid var(--border-color);
+  padding-left: 1rem;
+  margin-left: 0;
+  color: #777;
+}
+
+.guimd-editor-core pre {
+  background: var(--secondary-bg);
+  padding: 0.75rem 1rem;
+  border-radius: 4px;
+  overflow-x: auto;
+  font-family: 'Courier New', Courier, monospace;
+}
+
+.guimd-editor-core code {
+  background: var(--secondary-bg);
+  padding: 0.2rem 0.4rem;
+  border-radius: 3px;
+  font-size: 0.9em;
+  font-family: 'Courier New', Courier, monospace;
+}
+
+/* Tiptap Task Lists */
+.guimd-editor-core ul[data-type="taskList"] {
+  list-style: none;
+  padding: 0;
+}
+
+.guimd-editor-core ul[data-type="taskList"] li {
+  display: flex;
+  align-items: center;
+}
+
+.guimd-editor-core ul[data-type="taskList"] li>label {
+  flex: 0 0 auto;
+  margin-right: 0.5rem;
+  user-select: none;
+}
+
+.guimd-editor-core ul[data-type="taskList"] li>div {
+  flex: 1 1 auto;
+}
+
+/* Tiptap Tables */
+.guimd-editor-core table {
+  border-collapse: collapse;
+  margin: 0;
+  overflow: hidden;
+  table-layout: fixed;
+  width: 100%;
+}
+
+.guimd-editor-core td,
+.guimd-editor-core th {
+  border: 1px solid var(--border-color);
+  box-sizing: border-box;
+  min-width: 1em;
+  padding: 0.5rem;
+  position: relative;
+  vertical-align: top;
+}
+
+.guimd-editor-core th {
+  background-color: var(--secondary-bg);
+  font-weight: bold;
+  text-align: left;
+}
+
+.guimd-editor-core .selectedCell:after {
+  background: rgba(200, 255, 200, 0.4);
+  content: "";
+  left: 0;
+  right: 0;
+  top: 0;
+  bottom: 0;
+  pointer-events: none;
+  position: absolute;
+  z-index: 2;
+}
+
+.guimd-editor-core .column-resize-handle {
+  background-color: #81c784;
+  bottom: -2px;
+  position: absolute;
+  right: -2px;
+  pointer-events: none;
+  top: 0;
+  width: 4px;
+}
+
+/* Images */
+.guimd-editor-core img {
+  max-width: 100%;
+  height: auto;
+  display: block;
+}
+
+/* =====================
+   About Dialog
+   ===================== */
+.guimd-about-dialog {
+  min-width: 380px;
+  max-width: 480px;
+  width: 90vw;
+}
+
+.guimd-about-body {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  padding: 1.25rem 1.25rem 0.5rem;
+}
+
+.guimd-about-brand {
+  display: flex;
+  align-items: start;
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
+.guimd-about-logo {
+  flex-shrink: 0;
+}
+
+.guimd-about-logo-img {
+  border-radius: 8px;
+}
+
+.guimd-about-header {
+  display: flex;
+  align-items: baseline;
+  gap: 0.4rem;
+}
+
+.guimd-about-name {
+  font-size: 1.4rem;
+  font-weight: 700;
+  line-height: 1.1;
+  background: linear-gradient(135deg, #4caf50, #388e3c);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.guimd-about-version {
+  font-size: 1.2rem;
+  opacity: 0.5;
+  margin-top: 2px;
+}
+
+.guimd-about-tagline {
+  font-size: 0.82rem;
+  opacity: 0.65;
+  margin-top: 4px;
+}
+
+.guimd-about-divider {
+  height: 1px;
+  background: var(--border-color);
+  margin: 0.85rem 0;
+}
+
+.guimd-about-section-title {
+  font-size: 0.7rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  opacity: 0.45;
+  margin-bottom: 0.5rem;
+}
+
+.guimd-about-features {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.guimd-about-features li {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.85rem;
+  opacity: 0.85;
+}
+
+.guimd-about-tech {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.guimd-about-tech-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 0.85rem;
+}
+
+.guimd-about-tech-label {
+  opacity: 0.55;
+}
+
+.guimd-about-tech-value {
+  font-weight: 600;
+  font-size: 0.82rem;
+}
+
+.guimd-about-shortcuts {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.guimd-about-shortcut-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 0.85rem;
+}
+
+.guimd-kbd {
+  display: inline-block;
+  background: var(--btn-bg);
+  border: 1px solid var(--border-color);
+  border-radius: 4px;
+  padding: 1px 7px;
+  font-family: monospace;
+  font-size: 0.8rem;
+  box-shadow: 0 1px 0 var(--border-color);
+}
+
+.guimd-about-footer-note {
+  font-size: 0.75rem;
+  opacity: 0.4;
+  margin-right: auto;
+}
+
+/* Author card */
+.guimd-about-author {
+  display: flex;
+  align-items: start;
+  gap: 0.75rem;
+}
+
+.guimd-about-author-avatar {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #4caf50, #388e3c);
+  color: #fff;
+  font-size: 0.8rem;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  letter-spacing: 0.02em;
+}
+
+.guimd-about-author-info {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.guimd-about-author-name {
+  font-size: 0.9rem;
+  font-weight: 600;
+}
+
+.guimd-about-author-role {
+  font-size: 0.75rem;
+  opacity: 0.5;
+}
+
+.guimd-about-author-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  font-size: 0.8rem;
+  color: var(--text-main);
+  opacity: 0.6;
+  text-decoration: none;
+  border: 1px solid var(--border-color);
+  border-radius: 6px;
+  padding: 3px 10px;
+  transition: opacity 0.15s, background 0.15s;
+  white-space: nowrap;
+}
+
+.guimd-about-author-link:hover {
+  opacity: 1;
+  background: var(--btn-bg);
+}
+
+/* Help Dialog */
+.guimd-help-dialog {
+  max-width: 500px;
+}
+
+.guimd-help-section {
+  margin-bottom: 1.5rem;
+}
+
+.guimd-help-text {
+  font-size: 0.9rem;
+  opacity: 0.8;
+  margin-bottom: 1rem;
+  line-height: 1.5;
+}
+
+.guimd-help-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.5rem;
+  margin-top: 0.5rem;
+}
+
+.guimd-help-grid-item {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 4px 8px;
+  background: var(--btn-bg);
+  border: 1px solid var(--border-color);
+  border-radius: 4px;
+}
+
+.guimd-code-snippet {
+  font-family: monospace;
+  font-size: 0.85rem;
+  color: #4a9eff;
+  background: rgba(74, 158, 255, 0.1);
+  padding: 2px 4px;
+  border-radius: 3px;
+}
+
+.guimd-help-grid-desc {
+  font-size: 0.8rem;
+  opacity: 0.7;
+}
+
+/* Input Dialog */
+.guimd-input-dialog {
+  max-width: 400px;
+}
+
+.guimd-input-dialog-message {
+  font-size: 0.9rem;
+  margin-bottom: 0.75rem;
+  opacity: 0.8;
+}
+
+.guimd-input-field {
+  width: 100%;
+  padding: 0.2rem 0.4rem;
+  background: var(--btn-bg);
+  border: 1px solid var(--border-color);
+  border-radius: 6px;
+  color: var(--text-main);
+  font-size: 0.95rem;
+  outline: none;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.guimd-input-field:focus {
+  border-color: #4a9eff;
+  box-shadow: 0 0 0 2px rgba(74, 158, 255, 0.2);
+}
+
+.guimd-btn.secondary {
+  background: transparent;
+  border: 1px solid var(--border-color);
+  color: var(--text-main);
+  opacity: 0.7;
+}
+
+.guimd-btn.secondary:hover {
+  opacity: 1;
+  background: var(--btn-bg);
+}
