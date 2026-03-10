@@ -97,6 +97,79 @@ const Icon = {
             <line x1="15" y1="3" x2="15" y2="21" />
         </svg>
     ),
+    AddRowBefore: () => (
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M4 14v1a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-1" />
+            <path d="M4 14h16" />
+            <path d="M10 14v3" />
+            <path d="M14 14v3" />
+            <path d="M12 4v6" />
+            <path d="M9 7h6" />
+        </svg>
+    ),
+    AddRowAfter: () => (
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M4 10V9a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v1" />
+            <path d="M4 10h16" />
+            <path d="M10 7v3" />
+            <path d="M14 7v3" />
+            <path d="M12 14v6" />
+            <path d="M9 17h6" />
+        </svg>
+    ),
+    DeleteRow: () => (
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M4 14v1a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-1" />
+            <path d="M4 10V9a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v1" />
+            <path d="M4 10h16" />
+            <path d="M4 14h16" />
+            <path d="M10 7v7" />
+            <path d="M14 7v7" />
+            <path d="M8 12h8" color="red" />
+        </svg>
+    ),
+    AddColumnBefore: () => (
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M14 4h1a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2h-1" />
+            <path d="M14 4v16" />
+            <path d="M14 10h3" />
+            <path d="M14 14h3" />
+            <path d="M4 12h6" />
+            <path d="M7 9v6" />
+        </svg>
+    ),
+    AddColumnAfter: () => (
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M10 4H9a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h1" />
+            <path d="M10 4v16" />
+            <path d="M10 10H7" />
+            <path d="M10 14H7" />
+            <path d="M14 12h6" />
+            <path d="M17 9v6" />
+        </svg>
+    ),
+    DeleteColumn: () => (
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M14 4h1a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2h-1" />
+            <path d="M10 4H9a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h1" />
+            <path d="M10 4v16" />
+            <path d="M14 4v16" />
+            <path d="M7 10h7" />
+            <path d="M7 14h7" />
+            <path d="M12 8v8" color="red" />
+        </svg>
+    ),
+    DeleteTable: () => (
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <rect x="3" y="3" width="18" height="18" rx="2" />
+            <line x1="3" y1="9" x2="21" y2="9" />
+            <line x1="3" y1="15" x2="21" y2="15" />
+            <line x1="9" y1="3" x2="9" y2="21" />
+            <line x1="15" y1="3" x2="15" y2="21" />
+            <line x1="6" y1="6" x2="18" y2="18" color="red" />
+            <line x1="18" y1="6" x2="6" y2="18" color="red" />
+        </svg>
+    ),
     Link: () => (
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
             <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71" />
@@ -206,6 +279,37 @@ export const Toolbar: React.FC<ToolbarProps> = ({ editor, isViewMode, onToggleVi
             <TBtn title={t('toolbar.table')} onClick={() => editor.chain().focus().insertTable({ rows: 3, cols: 3, withHeaderRow: true }).run()}>
                 <Icon.Table />
             </TBtn>
+
+            {editor.isActive('table') && (
+                <>
+                    <span className="guimd-toolbar-sep" style={{ margin: '0 4px', background: 'rgba(50,50,50,0.2)' }} />
+                    <TBtn title={t('toolbar.table.addRowBefore')} onClick={() => editor.chain().focus().addRowBefore().run()}>
+                        <Icon.AddRowBefore />
+                    </TBtn>
+                    <TBtn title={t('toolbar.table.addRowAfter')} onClick={() => editor.chain().focus().addRowAfter().run()}>
+                        <Icon.AddRowAfter />
+                    </TBtn>
+                    <TBtn title={t('toolbar.table.deleteRow')} onClick={() => editor.chain().focus().deleteRow().run()}>
+                        <Icon.DeleteRow />
+                    </TBtn>
+                    <span className="guimd-toolbar-sep" style={{ margin: '0 4px', background: 'rgba(50,50,50,0.2)' }} />
+                    <TBtn title={t('toolbar.table.addColumnBefore')} onClick={() => editor.chain().focus().addColumnBefore().run()}>
+                        <Icon.AddColumnBefore />
+                    </TBtn>
+                    <TBtn title={t('toolbar.table.addColumnAfter')} onClick={() => editor.chain().focus().addColumnAfter().run()}>
+                        <Icon.AddColumnAfter />
+                    </TBtn>
+                    <TBtn title={t('toolbar.table.deleteColumn')} onClick={() => editor.chain().focus().deleteColumn().run()}>
+                        <Icon.DeleteColumn />
+                    </TBtn>
+                    <span className="guimd-toolbar-sep" style={{ margin: '0 4px', background: 'rgba(50,50,50,0.2)' }} />
+                    <TBtn title={t('toolbar.table.deleteTable')} onClick={() => editor.chain().focus().deleteTable().run()}>
+                        <Icon.DeleteTable />
+                    </TBtn>
+                    <span className="guimd-toolbar-sep" style={{ margin: '0 4px', background: 'rgba(50,50,50,0.2)' }} />
+                </>
+            )}
+
             <TBtn
                 title={t('toolbar.link')}
                 onClick={async () => {

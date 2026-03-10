@@ -85,8 +85,9 @@ export const MarkdownEditor: React.FC<EditorProps> = ({ content, onChange, onSel
                 // Plain text only — try to detect and convert Markdown
                 const plainText = clipboardData.getData('text/plain');
                 if (!plainText || plainText.trim().length === 0) return false;
-
-                if (looksLikeMarkdown(plainText)) {
+                const isMD = looksLikeMarkdown(plainText)
+                console.log('isMD', isMD)
+                if (isMD) {
                     event.preventDefault();
                     MdToHtml(plainText).then((html) => {
                         editorRef.current?.chain().focus().insertContent(html).run();

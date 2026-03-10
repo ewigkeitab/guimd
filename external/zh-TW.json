@@ -7,5 +7,12 @@
     "menu.help": "說明",
     "menu.about": "關於 Guimd",
     "editor.placeholder": "在此開始輸入您的 Markdown...",
-    "status.saved": "檔案已儲存"
+    "status.saved": "檔案已儲存",
+    "toolbar.table.addRowBefore": "在上方插入列",
+    "toolbar.table.addRowAfter": "在下方插入列",
+    "toolbar.table.deleteRow": "刪除列",
+    "toolbar.table.addColumnBefore": "在左側插入欄",
+    "toolbar.table.addColumnAfter": "在右側插入欄",
+    "toolbar.table.deleteColumn": "刪除欄",
+    "toolbar.table.deleteTable": "刪除表格"
 }

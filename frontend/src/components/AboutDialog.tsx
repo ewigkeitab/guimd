@@ -44,9 +44,6 @@ export const AboutDialog: React.FC<AboutDialogProps> = ({ open, onClose, version
                 <div className="guimd-dialog-body guimd-about-body">
                     {/* App branding */}
                     <div className="guimd-about-brand">
-                        <div className="guimd-about-logo">
-                            <img src={logo} alt={t('about.logo_alt')} width="48" height="48" className="guimd-about-logo-img" />
-                        </div>
                         <div>
                             <div className="guimd-about-header">
                                 <div className="guimd-about-name">Guimd</div>

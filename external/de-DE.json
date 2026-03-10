@@ -7,5 +7,12 @@
     "menu.help": "Hilfe",
     "menu.about": "Über Guimd",
     "editor.placeholder": "Beginnen Sie hier mit der Eingabe Ihres Markdowns...",
-    "status.saved": "Datei gespeichert"
+    "status.saved": "Datei gespeichert",
+    "toolbar.table.addRowBefore": "Zeile oberhalb einfügen",
+    "toolbar.table.addRowAfter": "Zeile unterhalb einfügen",
+    "toolbar.table.deleteRow": "Zeile löschen",
+    "toolbar.table.addColumnBefore": "Spalte links einfügen",
+    "toolbar.table.addColumnAfter": "Spalte rechts einfügen",
+    "toolbar.table.deleteColumn": "Spalte löschen",
+    "toolbar.table.deleteTable": "Tabelle löschen"
 }

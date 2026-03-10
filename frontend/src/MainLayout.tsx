@@ -25,7 +25,7 @@ export const MainLayout: React.FC = () => {
     const [statusMsg, setStatusMsg] = useState('');
     const [aboutOpen, setAboutOpen] = useState(false);
     const [helpOpen, setHelpOpen] = useState(false);
-    const [version, setVersion] = useState('1.0.0');
+    const [version, setVersion] = useState('1.0.2');
     const [systemIsDark, setSystemIsDark] = useState(false);
     const [isDirty, setIsDirty] = useState(false);
     const [editor, setEditor] = useState<Editor | null>(null);
@@ -143,7 +143,7 @@ export const MainLayout: React.FC = () => {
                 // For simplicity, keep the results until they search again
             }
         }
-
+        setFindBarInitialQuery(selectedText);
         setForceUpdate({});
     }, [editor]);
 

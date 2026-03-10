@@ -115,7 +115,7 @@ func (a *App) SaveFileDialog() (string, error) {
 
 // GetAppVersion returns the current application version string
 func (a *App) GetAppVersion() string {
-	return "1.0.0"
+	return "1.0.2"
 }
 
 // MdToHtml converts markdown to HTML

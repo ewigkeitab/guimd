@@ -61,19 +61,19 @@ prep-release:
 package-linux: generate prep-release
 	$(WAILS) build -platform linux/amd64 $(BUILD_FLAGS) $(TAGS)
 	mv build/bin/guimd* $(RELEASE_DIR)/ 2>/dev/null || true
-	cd $(RELEASE_DIR) && zip -r guimd-v$(VERSION)-linux-amd64.zip guimd* -x "*.zip"
+	cd $(RELEASE_DIR) && zip -r guimd-v$(VERSION)-linux-amd64.zip guimd -x "*.zip"
 
 # Package for Windows (generates NSIS installer)
 package-windows: generate prep-release
 	$(WAILS) build -platform windows/amd64 -nsis $(BUILD_FLAGS)
-	mv build/bin/guimd*-installer.exe $(RELEASE_DIR)/ 2>/dev/null || true
-	cd $(RELEASE_DIR) && zip -r guimd-v$(VERSION)-windows-amd64.zip guimd*.exe -x "*.zip"
+	mv build/bin/guimd.exe $(RELEASE_DIR)/ 2>/dev/null || true
+	cd $(RELEASE_DIR) && zip -r guimd-v$(VERSION)-windows-amd64.zip guimd.exe -x "*.zip"
 
 # Package for macOS (generates .dmg for universal binary)
 package-darwin: generate prep-release
 	$(WAILS) build -platform darwin/universal $(BUILD_FLAGS)
-	mv build/bin/guimd*.dmg $(RELEASE_DIR)/ 2>/dev/null || true
-	cd $(RELEASE_DIR) && zip -r guimd-v$(VERSION)-darwin-universal.zip guimd*.app -x "*.zip"
+	mv build/bin/guimd.app $(RELEASE_DIR)/ 2>/dev/null || true
+	cd $(RELEASE_DIR) && zip -r guimd-v$(VERSION)-darwin-universal.zip guimd.app -x "*.zip"
 
 # Package for all platforms
 package-all: package-linux package-windows package-darwin

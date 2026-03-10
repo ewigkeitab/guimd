@@ -2,9 +2,9 @@
   "editor": {
     "fontFamily": "Inter, sans-serif",
     "fontSize": 20,
-    "theme": "epaper"
+    "theme": "dark"
   },
-  "language": "en",
+  "language": "zh-TW",
   "layout": {
     "primary": "editor",
     "secondary": "sidebar",

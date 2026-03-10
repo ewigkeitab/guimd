@@ -102,6 +102,13 @@ const defaultTranslations: Record<string, string> = {
     "prompt.link_msg": "Enter the URL for this link:",
     "prompt.image_title": "Insert Image",
     "prompt.image_msg": "Enter the URL or path for the image:",
+    "toolbar.table.addRowBefore": "Add row before",
+    "toolbar.table.addRowAfter": "Add row after",
+    "toolbar.table.deleteRow": "Delete row",
+    "toolbar.table.addColumnBefore": "Add column before",
+    "toolbar.table.addColumnAfter": "Add column after",
+    "toolbar.table.deleteColumn": "Delete column",
+    "toolbar.table.deleteTable": "Delete table",
 };
 
 export const I18nProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
