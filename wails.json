@@ -14,6 +14,34 @@
     "icon": "./build/windows/icon.ico"
   },
   "darwin": {
-    "icon": "./build/appicon.png"
+    "icon": "./build/appicon.png",
+    "infoPlist": {
+      "CFBundleDocumentTypes": [
+        {
+          "CFBundleTypeName": "Markdown",
+          "CFBundleTypeRole": "Editor",
+          "LSHandlerRank": "Owner",
+          "LSItemContentTypes": [
+            "net.daringfireball.markdown",
+            "public.markdown"
+          ]
+        }
+      ],
+      "UTImportedTypeDeclarations": [
+        {
+          "UTTypeConformsTo": [
+            "public.plain-text"
+          ],
+          "UTTypeDescription": "Markdown",
+          "UTTypeIdentifier": "net.daringfireball.markdown",
+          "UTTypeTagSpecification": {
+            "public.filename-extension": [
+              "md",
+              "markdown"
+            ]
+          }
+        }
+      ]
+    }
   }
 }
