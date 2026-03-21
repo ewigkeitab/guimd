@@ -3,6 +3,10 @@
 
 export function GetAppVersion():Promise<string>;
 
+export function GetPendingFile():Promise<string>;
+
+export function GetRelativePath(arg1:string,arg2:string):Promise<string>;
+
 export function HtmlToMd(arg1:string):Promise<string>;
 
 export function HtmlToMdForFile(arg1:string,arg2:string):Promise<string>;
@@ -15,12 +19,22 @@ export function MdToHtml(arg1:string):Promise<string>;
 
 export function MdToHtmlWithBase(arg1:string,arg2:string):Promise<string>;
 
+export function NewWindow(arg1:string):Promise<void>;
+
+export function OnFileOpen(arg1:string):Promise<void>;
+
 export function OpenFileDialog():Promise<string>;
 
 export function ReadFile(arg1:string):Promise<string>;
+
+export function ResolveImagePath(arg1:string,arg2:string):Promise<string>;
 
 export function SaveConfig(arg1:Record<string, any>):Promise<void>;
 
 export function SaveFile(arg1:string,arg2:string):Promise<void>;
 
 export function SaveFileDialog():Promise<string>;
+
+export function SetDirty(arg1:boolean):Promise<void>;
+
+export function UnresolveImagePath(arg1:string):Promise<string>;

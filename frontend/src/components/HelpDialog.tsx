@@ -63,7 +63,8 @@ export const HelpDialog: React.FC<HelpDialogProps> = ({ open, onClose }) => {
                         </div>
                     </div>
 
-                    <div className="guimd-about-divider" />
+
+
 
                     <div className="guimd-help-section">
                         <div className="guimd-about-section-title">{t('help.shortcuts')}</div>
@@ -83,7 +84,8 @@ export const HelpDialog: React.FC<HelpDialogProps> = ({ open, onClose }) => {
                             ))}
                         </div>
                     </div>
-                    <div className="guimd-about-divider" />
+
+
 
                     <div className="guimd-help-section">
                         <div className="guimd-about-section-title">{t('help.features')}</div>

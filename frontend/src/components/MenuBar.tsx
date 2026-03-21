@@ -7,11 +7,13 @@ export interface MenuItemDef {
     disabled?: boolean;
     title?: string;      // native tooltip (e.g. full path for recent files)
     items?: MenuItemDef[];
+    icon?: React.ReactNode;
 }
 
 interface MenuDef {
     label: string;
     items: MenuItemDef[];
+    icon?: React.ReactNode;
 }
 
 interface MenuBarProps {
@@ -43,7 +45,10 @@ const MenuItem: React.FC<{ item: MenuItemDef, onAction: () => void }> = ({ item,
                 onMouseLeave={handleMouseLeave}
             >
                 <button className="guimd-menu-item" disabled={item.disabled}>
-                    <span>{item.label}</span>
+                    <div className="guimd-menu-item-content">
+                        {item.icon && <span className="guimd-menu-item-icon">{item.icon}</span>}
+                        <span className="guimd-menu-item-label">{item.label}</span>
+                    </div>
                     <span className="guimd-menu-submenu-arrow">▶</span>
                 </button>
                 {isSubOpen && (
@@ -67,13 +72,16 @@ const MenuItem: React.FC<{ item: MenuItemDef, onAction: () => void }> = ({ item,
                 item.action?.();
             }}
         >
-            {(() => {
-                const parts = (item.label ?? '').split('\t');
-                return <>
-                    <span>{parts[0]}</span>
-                    {parts[1] && <span className="guimd-menu-item-shortcut">{parts[1]}</span>}
-                </>;
-            })()}
+            <div className="guimd-menu-item-content">
+                {item.icon && <span className="guimd-menu-item-icon">{item.icon}</span>}
+                {(() => {
+                    const parts = (item.label ?? '').split('\t');
+                    return <>
+                        <span className="guimd-menu-item-label">{parts[0]}</span>
+                        {parts[1] && <span className="guimd-menu-item-shortcut">{parts[1]}</span>}
+                    </>;
+                })()}
+            </div>
         </button>
     );
 };
@@ -106,7 +114,10 @@ export const MenuBar: React.FC<MenuBarProps> = ({ menus }) => {
                         className={`guimd-menu-trigger${openMenu === idx ? ' active' : ''}`}
                         onClick={() => toggle(idx)}
                     >
-                        {menu.label}
+                        <div className="guimd-menu-trigger-content">
+                            {menu.icon && <span className="guimd-menu-trigger-icon">{menu.icon}</span>}
+                            <span className="guimd-menu-trigger-label">{menu.label}</span>
+                        </div>
                     </button>
                     {openMenu === idx && (
                         <div className="guimd-dropdown">

@@ -55,7 +55,12 @@ export const InputDialog: React.FC<InputDialogProps> = ({ open, title, message, 
                         className="guimd-input-field"
                         value={value}
                         onChange={(e) => setValue(e.target.value)}
-                        onKeyDown={handleKeyDown}
+                        onKeyDown={(e) => {
+                            e.stopPropagation();
+                            handleKeyDown(e);
+                        }}
+                        onKeyUp={(e) => e.stopPropagation()}
+                        onPaste={(e) => e.stopPropagation()}
                         placeholder="..."
                     />
                 </div>

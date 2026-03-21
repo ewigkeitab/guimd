@@ -17,12 +17,12 @@
 }
 
 .guimd-electric-paper {
-  --primary-bg: #e8e4db;
-  --secondary-bg: #dfdbd2;
-  --text-main: #363636;
-  --border-color: #d1cdc4;
-  --btn-bg: #d6d2c9;
-  --btn-hover: #c9c5bd;
+  --primary-bg: #dfdeda;
+  --secondary-bg: #d7d5d1;
+  --text-main: #333333;
+  --border-color: #cac8c4;
+  --btn-bg: #cfcdc9;
+  --btn-hover: #c2c0bc;
 }
 
 .guimd-config-error {
@@ -56,14 +56,15 @@ body {
   background-color: var(--primary-bg);
   color: var(--text-main);
   overflow: hidden;
+  position: relative;
 }
 
 .guimd-header {
   display: flex;
   align-items: center;
   padding: 0.5rem 1rem;
-  background-color: var(--secondary-bg);
-  border-bottom: 1px solid var(--border-color);
+  background-color: var(--primary-bg);
+
   height: 2rem;
   box-sizing: border-box;
 }
@@ -118,6 +119,7 @@ body {
   /* ensure it does not overflow its flex parent */
   min-height: 0;
   overflow: hidden;
+
 }
 
 .guimd-editor-container {
@@ -137,7 +139,7 @@ body {
   flex: 1;
   overflow-y: auto;
   scroll-behavior: smooth;
-  padding: 1.5rem 2rem 3rem;
+  padding: 0;
   box-sizing: border-box;
 }
 
@@ -150,6 +152,67 @@ body {
   background-color: var(--secondary-bg);
   border-bottom: 1px solid var(--border-color);
   flex-wrap: wrap;
+  margin-left: 8px;
+  margin-right: 8px;
+  margin-top: 2px;
+  margin-bottom: 10px;
+  border-radius: 8px;
+  border-width: 1px;
+  border-color: var(--border-color);
+  box-shadow: 2px 2px 12px rgba(0, 0, 0, 0.1);
+  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1),
+    opacity 0.3s ease,
+    max-height 0.3s ease,
+    margin 0.3s ease,
+    padding 0.3s ease,
+    border-width 0.3s ease;
+  opacity: 0;
+  max-height: 0;
+  transform: translateY(-10px);
+  margin-bottom: 0;
+  pointer-events: none;
+  overflow: hidden;
+  border-width: 0;
+}
+
+.guimd-toolbar.active {
+  opacity: 1;
+  max-height: 200px;
+  transform: translateY(0);
+  margin-bottom: 10px;
+  pointer-events: auto;
+  border-width: 2px;
+}
+
+.guimd-toolbar-floating {
+  position: absolute;
+  top: 2.5rem;
+  right: 1rem;
+  z-index: 1000;
+  display: flex;
+  background: var(--bg-main);
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  padding: 4px;
+  transition: opacity 0.3s ease, transform 0.3s ease, visibility 0.3s, box-shadow 0.2s;
+  opacity: 0;
+  transform: scale(0.8);
+  pointer-events: none;
+  visibility: hidden;
+}
+
+.guimd-toolbar-floating.active {
+  opacity: 0.6;
+  transform: scale(1);
+  pointer-events: auto;
+  visibility: visible;
+}
+
+.guimd-toolbar-floating:hover {
+  opacity: 1;
+  transform: translateY(2px);
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.2);
 }
 
 .guimd-toolbar-sep {
@@ -181,6 +244,12 @@ body {
 
 .guimd-tbtn:hover {
   background-color: var(--btn-bg);
+}
+
+.guimd-tbtn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+  pointer-events: none;
 }
 
 .guimd-tbtn.active {
@@ -222,14 +291,15 @@ body {
 .guimd-editor-core {
   outline: none;
   min-height: 100%;
-  padding-bottom: 2rem;
+  padding: 1.5rem 2rem 200vh;
+  /* Maximum flexibility for scroll-past-end */
 }
 
 /* MenuBar */
 .guimd-menubar {
   display: flex;
   gap: 0.25rem;
-  flex: 1;
+  flex: 0 0 auto;
 }
 
 .guimd-menu-root {
@@ -250,6 +320,27 @@ body {
 .guimd-menu-trigger:hover,
 .guimd-menu-trigger.active {
   background-color: var(--btn-bg);
+}
+
+.guimd-menu-trigger-content {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  flex-shrink: 0;
+}
+
+.guimd-menu-trigger-label {
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.guimd-menu-trigger-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 14px;
+  height: 14px;
+  opacity: 0.8;
 }
 
 /* =====================
@@ -438,17 +529,39 @@ body {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 2rem;
   width: 100%;
   text-align: left;
   background: transparent;
   border: none;
   color: var(--text-main);
-  padding: 0.4rem 1rem;
+  padding: 0.4rem 0.75rem;
   cursor: pointer;
   font-size: 0.9rem;
   transition: background-color 0.15s;
   box-sizing: border-box;
+  min-width: 160px;
+}
+
+.guimd-menu-item-content {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  flex: 1;
+}
+
+.guimd-menu-item-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 16px;
+  height: 16px;
+  opacity: 0.8;
+  flex-shrink: 0;
+}
+
+.guimd-menu-item-label {
+  flex: 1;
+  white-space: nowrap;
 }
 
 /* The tab character in label text becomes a spacer—
@@ -514,7 +627,7 @@ body {
   background: transparent;
   border: none;
   cursor: pointer;
-  color: white;
+  color: var(--text-main);
   opacity: 0.6;
   padding: 4px;
   border-radius: 4px;
@@ -546,8 +659,16 @@ body {
   padding: 0 1rem;
   height: 26px;
   font-size: 0.75rem;
+  margin-top: 8px;
+  margin-bottom: 4px;
+  margin-left: 8px;
+  margin-right: 8px;
+  box-shadow: 0px -2px 15px rgba(0, 0, 0, 0.05);
   background-color: var(--secondary-bg);
-  border-top: 1px solid var(--border-color);
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  border-color: var(--border-color);
+  border-width: 1px;
   flex-shrink: 0;
   user-select: none;
 }
@@ -603,14 +724,14 @@ body {
 /* Structure Popup */
 .guimd-structure-popup {
   position: absolute;
-  bottom: 26px;
+  bottom: 42px;
   /* slightly higher than statusbar */
   right: 1rem;
   width: 280px;
   max-height: 400px;
   background-color: var(--secondary-bg);
   border: 1px solid var(--border-color);
-  border-radius: 6px 6px 0 0;
+  border-radius: 8px;
   box-shadow: 0 -4px 12px rgba(0, 0, 0, 0.2);
   display: flex;
   flex-direction: column;
@@ -651,15 +772,29 @@ body {
   overflow: hidden;
   text-overflow: ellipsis;
   user-select: none;
-  transition: background-color 0.15s, opacity 0.15s;
+  transition: background-color 0.15s, color 0.15s;
   text-align: start;
-  background-color: var(--btn-bg);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1rem;
 }
 
 .guimd-structure-item:hover {
   background-color: var(--btn-hover);
-  color: red;
   opacity: 1;
+}
+
+.guimd-structure-text {
+  flex: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.guimd-structure-line {
+  font-size: 0.7rem;
+  opacity: 0.5;
+  white-space: nowrap;
 }
 
 .guimd-structure-item.level-1 {
@@ -727,7 +862,6 @@ body {
   align-items: start;
   justify-content: space-between;
   padding: 0.75rem 1rem;
-  border-bottom: 1px solid var(--border-color);
 }
 
 .guimd-dialog-header {
@@ -735,7 +869,6 @@ body {
   align-items: center;
   justify-content: space-between;
   padding: 0.75rem 1rem;
-  border-bottom: 1px solid var(--border-color);
 }
 
 .guimd-dialog-title {
@@ -774,11 +907,24 @@ body {
   margin: 0.25rem 0;
 }
 
+.guimd-input-group {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.guimd-input-label {
+  text-align: start;
+  font-size: 0.8rem;
+  font-weight: 600;
+  opacity: 0.8;
+}
+
 .guimd-dialog-footer {
   display: flex;
   justify-content: flex-end;
   padding: 0.75rem 1rem;
-  border-top: 1px solid var(--border-color);
+
   gap: 0.5rem;
 }
 
@@ -864,15 +1010,6 @@ body {
   z-index: 2;
 }
 
-.guimd-editor-core .column-resize-handle {
-  background-color: #81c784;
-  bottom: -2px;
-  position: absolute;
-  right: -2px;
-  pointer-events: none;
-  top: 0;
-  width: 4px;
-}
 
 /* Images */
 .guimd-editor-core img {
@@ -940,11 +1077,7 @@ body {
   margin-top: 4px;
 }
 
-.guimd-about-divider {
-  height: 1px;
-  background: var(--border-color);
-  margin: 0.85rem 0;
-}
+
 
 .guimd-about-section-title {
   font-size: 0.7rem;

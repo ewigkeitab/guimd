@@ -45,7 +45,10 @@ const defaultTranslations: Record<string, string> = {
     "error.loadRecentFile": "Failed to open recent file. It may have been moved or deleted.",
     "error.config": "Configuration Error: Layout or Editor settings missing.",
     "confirm.unlink": "Are you sure you want to remove this link?",
+    "confirm.reload_title": "Reload File",
     "confirm.reload": "The file has unsaved changes. Are you sure you want to reload?",
+    "confirm.unsaved_changes_title": "Unsaved Changes",
+    "confirm.unsaved_changes": "The file has unsaved changes. Are you sure you want to proceed?",
     "about.title": "About Guimd",
     "about.tagline": "Cross-platform Markdown editor",
     "about.author": "Author",
@@ -100,6 +103,8 @@ const defaultTranslations: Record<string, string> = {
     "toolbar.viewMode": "View Mode",
     "prompt.link_title": "Insert Link",
     "prompt.link_msg": "Enter the URL for this link:",
+    "prompt.link_text": "Text to display",
+    "prompt.link_url": "URL",
     "prompt.image_title": "Insert Image",
     "prompt.image_msg": "Enter the URL or path for the image:",
     "toolbar.table.addRowBefore": "Add row before",
@@ -109,6 +114,8 @@ const defaultTranslations: Record<string, string> = {
     "toolbar.table.addColumnAfter": "Add column after",
     "toolbar.table.deleteColumn": "Delete column",
     "toolbar.table.deleteTable": "Delete table",
+    "toolbar.horizontalRule": "Horizontal Rule",
+    "prompt.remove_link": "Remove Link",
 };
 
 export const I18nProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {

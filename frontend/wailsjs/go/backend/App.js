@@ -6,6 +6,14 @@ export function GetAppVersion() {
   return window['go']['backend']['App']['GetAppVersion']();
 }
 
+export function GetPendingFile() {
+  return window['go']['backend']['App']['GetPendingFile']();
+}
+
+export function GetRelativePath(arg1, arg2) {
+  return window['go']['backend']['App']['GetRelativePath'](arg1, arg2);
+}
+
 export function HtmlToMd(arg1) {
   return window['go']['backend']['App']['HtmlToMd'](arg1);
 }
@@ -30,12 +38,24 @@ export function MdToHtmlWithBase(arg1, arg2) {
   return window['go']['backend']['App']['MdToHtmlWithBase'](arg1, arg2);
 }
 
+export function NewWindow(arg1) {
+  return window['go']['backend']['App']['NewWindow'](arg1);
+}
+
+export function OnFileOpen(arg1) {
+  return window['go']['backend']['App']['OnFileOpen'](arg1);
+}
+
 export function OpenFileDialog() {
   return window['go']['backend']['App']['OpenFileDialog']();
 }
 
 export function ReadFile(arg1) {
   return window['go']['backend']['App']['ReadFile'](arg1);
+}
+
+export function ResolveImagePath(arg1, arg2) {
+  return window['go']['backend']['App']['ResolveImagePath'](arg1, arg2);
 }
 
 export function SaveConfig(arg1) {
@@ -48,4 +68,12 @@ export function SaveFile(arg1, arg2) {
 
 export function SaveFileDialog() {
   return window['go']['backend']['App']['SaveFileDialog']();
+}
+
+export function SetDirty(arg1) {
+  return window['go']['backend']['App']['SetDirty'](arg1);
+}
+
+export function UnresolveImagePath(arg1) {
+  return window['go']['backend']['App']['UnresolveImagePath'](arg1);
 }

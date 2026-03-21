@@ -1,6 +1,7 @@
 import React from 'react';
 import { Editor } from '@tiptap/react';
 import { useI18n } from '../contexts/I18nContext';
+import { ResolveImagePath } from '../../wailsjs/go/backend/App';
 
 interface ToolbarProps {
     editor: Editor | null;
@@ -9,6 +10,8 @@ interface ToolbarProps {
     onZoomIn: () => void;
     onZoomOut: () => void;
     onPrompt: (title: string, message: string, initialValue?: string) => Promise<string | null>;
+    onLinkPrompt: (title: string, initialText?: string, initialUrl?: string) => Promise<{ text: string, url: string } | null>;
+    currentFile?: string | null;
 }
 
 // SVG icon components
@@ -202,108 +205,127 @@ const Icon = {
             <line x1="15" y1="11" x2="23" y2="11" />
         </svg>
     ),
+    HorizontalRule: () => (
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+            <line x1="4" y1="12" x2="20" y2="12" />
+        </svg>
+    ),
 };
 
 interface TBtnProps {
     title: string;
     onClick: () => void;
     active?: boolean;
-    hideHint?: boolean;
+    disabled?: boolean;
     children: React.ReactNode;
 }
 
-const TBtn: React.FC<TBtnProps> = ({ title, onClick, active, hideHint, children }) => (
+const TBtn: React.FC<TBtnProps> = ({ title, onClick, active, disabled, children }) => (
     <button
         className={`guimd-tbtn${active ? ' active' : ''}`}
         onClick={onClick}
         title={title}
         aria-label={title}
+        disabled={disabled}
     >
         {children}
-        {!hideHint && <span className="guimd-tbtn-hint">{title}</span>}
     </button>
 );
 
-export const Toolbar: React.FC<ToolbarProps> = ({ editor, isViewMode, onToggleViewMode, onZoomIn, onZoomOut, onPrompt }) => {
+export const Toolbar: React.FC<ToolbarProps> = ({ editor, isViewMode, onToggleViewMode, onZoomIn, onZoomOut, onPrompt, onLinkPrompt, currentFile }) => {
     const { t } = useI18n();
 
     if (!editor) return null;
 
     return (
-        <div className="guimd-toolbar">
-            <TBtn title={t('toolbar.bold')} onClick={() => editor.chain().focus().toggleBold().run()} active={editor.isActive('bold')}>
+        <div className="guimd-toolbar-container">
+            <div className={`guimd-toolbar-floating ${isViewMode ? 'active' : ''}`}>
+                <TBtn
+                    title={t('toolbar.editMode')}
+                    onClick={onToggleViewMode}
+                    active={true}
+                >
+                    <Icon.Eye />
+                </TBtn>
+            </div>
+
+            <div className={`guimd-toolbar ${!isViewMode ? 'active' : ''}`}>
+            <TBtn title={t('toolbar.bold')} onClick={() => editor.chain().focus().toggleBold().run()} active={editor.isActive('bold')} disabled={isViewMode}>
                 <Icon.Bold />
             </TBtn>
-            <TBtn title={t('toolbar.italic')} onClick={() => editor.chain().focus().toggleItalic().run()} active={editor.isActive('italic')}>
+            <TBtn title={t('toolbar.italic')} onClick={() => editor.chain().focus().toggleItalic().run()} active={editor.isActive('italic')} disabled={isViewMode}>
                 <Icon.Italic />
             </TBtn>
-            <TBtn title={t('toolbar.underline')} onClick={() => editor.chain().focus().toggleUnderline().run()} active={editor.isActive('underline')}>
+            <TBtn title={t('toolbar.underline')} onClick={() => editor.chain().focus().toggleUnderline().run()} active={editor.isActive('underline')} disabled={isViewMode}>
                 <Icon.Underline />
             </TBtn>
 
             <span className="guimd-toolbar-sep" />
 
-            <TBtn title={t('toolbar.h1')} onClick={() => editor.chain().focus().toggleHeading({ level: 1 }).run()} active={editor.isActive('heading', { level: 1 })}>
+            <TBtn title={t('toolbar.h1')} onClick={() => editor.chain().focus().toggleHeading({ level: 1 }).run()} active={editor.isActive('heading', { level: 1 })} disabled={isViewMode}>
                 <Icon.H1 />
             </TBtn>
-            <TBtn title={t('toolbar.h2')} onClick={() => editor.chain().focus().toggleHeading({ level: 2 }).run()} active={editor.isActive('heading', { level: 2 })}>
+            <TBtn title={t('toolbar.h2')} onClick={() => editor.chain().focus().toggleHeading({ level: 2 }).run()} active={editor.isActive('heading', { level: 2 })} disabled={isViewMode}>
                 <Icon.H2 />
             </TBtn>
-            <TBtn title={t('toolbar.h3')} onClick={() => editor.chain().focus().toggleHeading({ level: 3 }).run()} active={editor.isActive('heading', { level: 3 })}>
+            <TBtn title={t('toolbar.h3')} onClick={() => editor.chain().focus().toggleHeading({ level: 3 }).run()} active={editor.isActive('heading', { level: 3 })} disabled={isViewMode}>
                 <Icon.H3 />
             </TBtn>
 
             <span className="guimd-toolbar-sep" />
 
-            <TBtn title={t('toolbar.bulletList')} onClick={() => editor.chain().focus().toggleBulletList().run()} active={editor.isActive('bulletList')}>
+            <TBtn title={t('toolbar.bulletList')} onClick={() => editor.chain().focus().toggleBulletList().run()} active={editor.isActive('bulletList')} disabled={isViewMode}>
                 <Icon.BulletList />
             </TBtn>
-            <TBtn title={t('toolbar.orderedList')} onClick={() => editor.chain().focus().toggleOrderedList().run()} active={editor.isActive('orderedList')}>
+            <TBtn title={t('toolbar.orderedList')} onClick={() => editor.chain().focus().toggleOrderedList().run()} active={editor.isActive('orderedList')} disabled={isViewMode}>
                 <Icon.OrderedList />
             </TBtn>
-            <TBtn title={t('toolbar.taskList')} onClick={() => editor.chain().focus().toggleTaskList().run()} active={editor.isActive('taskList')}>
+            <TBtn title={t('toolbar.taskList')} onClick={() => editor.chain().focus().toggleTaskList().run()} active={editor.isActive('taskList')} disabled={isViewMode}>
                 <Icon.TaskList />
             </TBtn>
 
             <span className="guimd-toolbar-sep" />
 
-            <TBtn title={t('toolbar.blockquote')} onClick={() => editor.chain().focus().toggleBlockquote().run()} active={editor.isActive('blockquote')}>
+            <TBtn title={t('toolbar.blockquote')} onClick={() => editor.chain().focus().toggleBlockquote().run()} active={editor.isActive('blockquote')} disabled={isViewMode}>
                 <Icon.Quote />
             </TBtn>
-            <TBtn title={t('toolbar.codeBlock')} onClick={() => editor.chain().focus().toggleCodeBlock().run()} active={editor.isActive('codeBlock')}>
+            <TBtn title={t('toolbar.codeBlock')} onClick={() => editor.chain().focus().toggleCodeBlock().run()} active={editor.isActive('codeBlock')} disabled={isViewMode}>
                 <Icon.Code />
+            </TBtn>
+            <TBtn title={t('toolbar.horizontalRule')} onClick={() => editor.chain().focus().setHorizontalRule().run()} disabled={isViewMode}>
+                <Icon.HorizontalRule />
             </TBtn>
 
             <span className="guimd-toolbar-sep" />
 
-            <TBtn title={t('toolbar.table')} onClick={() => editor.chain().focus().insertTable({ rows: 3, cols: 3, withHeaderRow: true }).run()}>
+            <TBtn title={t('toolbar.table')} onClick={() => editor.chain().focus().insertTable({ rows: 3, cols: 3, withHeaderRow: true }).run()} disabled={isViewMode}>
                 <Icon.Table />
             </TBtn>
 
             {editor.isActive('table') && (
                 <>
                     <span className="guimd-toolbar-sep" style={{ margin: '0 4px', background: 'rgba(50,50,50,0.2)' }} />
-                    <TBtn title={t('toolbar.table.addRowBefore')} onClick={() => editor.chain().focus().addRowBefore().run()}>
+                    <TBtn title={t('toolbar.table.addRowBefore')} onClick={() => editor.chain().focus().addRowBefore().run()} disabled={isViewMode}>
                         <Icon.AddRowBefore />
                     </TBtn>
-                    <TBtn title={t('toolbar.table.addRowAfter')} onClick={() => editor.chain().focus().addRowAfter().run()}>
+                    <TBtn title={t('toolbar.table.addRowAfter')} onClick={() => editor.chain().focus().addRowAfter().run()} disabled={isViewMode}>
                         <Icon.AddRowAfter />
                     </TBtn>
-                    <TBtn title={t('toolbar.table.deleteRow')} onClick={() => editor.chain().focus().deleteRow().run()}>
+                    <TBtn title={t('toolbar.table.deleteRow')} onClick={() => editor.chain().focus().deleteRow().run()} disabled={isViewMode}>
                         <Icon.DeleteRow />
                     </TBtn>
                     <span className="guimd-toolbar-sep" style={{ margin: '0 4px', background: 'rgba(50,50,50,0.2)' }} />
-                    <TBtn title={t('toolbar.table.addColumnBefore')} onClick={() => editor.chain().focus().addColumnBefore().run()}>
+                    <TBtn title={t('toolbar.table.addColumnBefore')} onClick={() => editor.chain().focus().addColumnBefore().run()} disabled={isViewMode}>
                         <Icon.AddColumnBefore />
                     </TBtn>
-                    <TBtn title={t('toolbar.table.addColumnAfter')} onClick={() => editor.chain().focus().addColumnAfter().run()}>
+                    <TBtn title={t('toolbar.table.addColumnAfter')} onClick={() => editor.chain().focus().addColumnAfter().run()} disabled={isViewMode}>
                         <Icon.AddColumnAfter />
                     </TBtn>
-                    <TBtn title={t('toolbar.table.deleteColumn')} onClick={() => editor.chain().focus().deleteColumn().run()}>
+                    <TBtn title={t('toolbar.table.deleteColumn')} onClick={() => editor.chain().focus().deleteColumn().run()} disabled={isViewMode}>
                         <Icon.DeleteColumn />
                     </TBtn>
                     <span className="guimd-toolbar-sep" style={{ margin: '0 4px', background: 'rgba(50,50,50,0.2)' }} />
-                    <TBtn title={t('toolbar.table.deleteTable')} onClick={() => editor.chain().focus().deleteTable().run()}>
+                    <TBtn title={t('toolbar.table.deleteTable')} onClick={() => editor.chain().focus().deleteTable().run()} disabled={isViewMode}>
                         <Icon.DeleteTable />
                     </TBtn>
                     <span className="guimd-toolbar-sep" style={{ margin: '0 4px', background: 'rgba(50,50,50,0.2)' }} />
@@ -313,33 +335,55 @@ export const Toolbar: React.FC<ToolbarProps> = ({ editor, isViewMode, onToggleVi
             <TBtn
                 title={t('toolbar.link')}
                 onClick={async () => {
-                    const previousUrl = editor.getAttributes('link').href;
-                    const url = await onPrompt(t('prompt.link_title'), t('prompt.link_msg'), previousUrl);
+                    let initialText = '';
+                    let initialUrl = '';
 
-                    // cancelled
-                    if (url === null) {
+                    if (editor.isActive('link')) {
+                        // Get current link info
+                        initialUrl = editor.getAttributes('link').href || '';
+                        
+                        // Extract text of the link
+                        const { from, to } = editor.state.selection;
+                        // Temp extend to get full link text
+                        editor.chain().extendMarkRange('link').run();
+                        initialText = editor.state.doc.textBetween(editor.state.selection.from, editor.state.selection.to);
+                        // If we didn't actually select anything or it's empty, use original from/to
+                    } else if (!editor.state.selection.empty) {
+                        initialText = editor.state.doc.textBetween(editor.state.selection.from, editor.state.selection.to);
+                    }
+
+                    const result = await onLinkPrompt(t('prompt.link_title'), initialText, initialUrl);
+
+                    if (result === null) {
                         return;
                     }
 
-                    // empty
-                    if (url === '') {
+                    if (result.url === '') {
                         editor.chain().focus().extendMarkRange('link').unsetLink().run();
                         return;
                     }
 
-                    // update link
-                    editor.chain().focus().extendMarkRange('link').setLink({ href: url }).run();
+                    // Update or insert link
+                    const { text, url } = result;
+                    editor.chain().focus().extendMarkRange('link').insertContent({
+                        type: 'text',
+                        text: text || url,
+                        marks: [{ type: 'link', attrs: { href: url } }]
+                    }).run();
                 }}
                 active={editor.isActive('link')}
+                disabled={isViewMode}
             >
                 <Icon.Link />
             </TBtn>
             <TBtn
                 title={t('toolbar.image')}
                 onClick={async () => {
-                    const url = await onPrompt(t('prompt.image_title'), t('prompt.image_msg'), '');
-                    if (url) {
-                        editor.chain().focus().setImage({ src: url }).run();
+                    const path = await onPrompt(t('prompt.image_title'), t('prompt.image_msg'), '');
+                    if (path) {
+                        // Resolve path (especially relative ones) to /wails-local-file/ URI
+                        const resolvedSrc = await ResolveImagePath(currentFile || '', path);
+                        editor.chain().focus().setImage({ src: resolvedSrc }).run();
                     }
                 }}
             >
@@ -348,10 +392,10 @@ export const Toolbar: React.FC<ToolbarProps> = ({ editor, isViewMode, onToggleVi
 
             <div style={{ marginLeft: 'auto', display: 'flex', gap: '2px' }}>
                 <span className="guimd-toolbar-sep" style={{ margin: '0 4px' }} />
-                <TBtn title={t('toolbar.zoomOut')} onClick={onZoomOut} hideHint>
+                <TBtn title={t('toolbar.zoomOut')} onClick={onZoomOut}>
                     <Icon.FontDecrease />
                 </TBtn>
-                <TBtn title={t('toolbar.zoomIn')} onClick={onZoomIn} hideHint>
+                <TBtn title={t('toolbar.zoomIn')} onClick={onZoomIn}>
                     <Icon.FontIncrease />
                 </TBtn>
 
@@ -361,11 +405,11 @@ export const Toolbar: React.FC<ToolbarProps> = ({ editor, isViewMode, onToggleVi
                     title={isViewMode ? t('toolbar.editMode') : t('toolbar.viewMode')}
                     onClick={onToggleViewMode}
                     active={isViewMode}
-                    hideHint
                 >
                     <Icon.Eye />
                 </TBtn>
             </div>
         </div>
-    );
+    </div>
+);
 };

@@ -14,5 +14,7 @@
     "toolbar.table.addColumnBefore": "Spalte links einfügen",
     "toolbar.table.addColumnAfter": "Spalte rechts einfügen",
     "toolbar.table.deleteColumn": "Spalte löschen",
-    "toolbar.table.deleteTable": "Tabelle löschen"
+    "toolbar.table.deleteTable": "Tabelle löschen",
+    "toolbar.horizontalRule": "Horizontale Linie einfügen",
+    "prompt.remove_link": "Link entfernen"
 }

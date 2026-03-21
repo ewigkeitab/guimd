@@ -14,5 +14,7 @@
     "toolbar.table.addColumnBefore": "在左側插入欄",
     "toolbar.table.addColumnAfter": "在右側插入欄",
     "toolbar.table.deleteColumn": "刪除欄",
-    "toolbar.table.deleteTable": "刪除表格"
+    "toolbar.table.deleteTable": "刪除表格",
+    "toolbar.horizontalRule": "插入水平線",
+    "prompt.remove_link": "移除連結"
 }

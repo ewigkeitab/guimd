@@ -1,6 +1,11 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { Editor } from '@tiptap/react';
-import { RefreshCcw, ChevronUp, ChevronDown } from 'lucide-react';
+import {
+    RefreshCcw, ChevronUp, ChevronDown,
+    FilePlus, FolderOpen, History, Save, Download,
+    Search, Palette, Languages, Info, HelpCircle,
+    Sun, Moon, Monitor, Feather, Trash2, FileText, Globe
+} from 'lucide-react';
 import { useConfig } from './contexts/ConfigContext';
 import { useI18n } from './contexts/I18nContext';
 import { MarkdownEditor } from './components/Editor';
@@ -9,13 +14,16 @@ import { Toolbar } from './components/Toolbar';
 import { AboutDialog } from './components/AboutDialog';
 import { HelpDialog } from './components/HelpDialog';
 import { InputDialog } from './components/InputDialog';
+import { ConfirmDialog } from './components/ConfirmDialog';
+import { LinkDialog } from './components/LinkDialog';
 import { FindReplaceDialog } from './components/FindReplaceDialog';
-import { SaveFile, ReadFile, OpenFileDialog, SaveFileDialog, MdToHtml, MdToHtmlWithBase, HtmlToMd, HtmlToMdForFile } from '../wailsjs/go/backend/App';
+import { SaveFile, ReadFile, OpenFileDialog, SaveFileDialog, MdToHtml, MdToHtmlWithBase, HtmlToMd, HtmlToMdForFile, GetPendingFile, SetDirty } from '../wailsjs/go/backend/App';
+import { EventsOn } from '../wailsjs/runtime';
 
 export const MainLayout: React.FC = () => {
     const { config, updateConfig } = useConfig();
     const { t } = useI18n();
-    const [content, setContent] = useState(`<h1>${t('about.title')}</h1><p>${t('editor.placeholder')}</p>`);
+    const [content, setContent] = useState('');
     const [currentFile, setCurrentFile] = useState<string | null>(null);
     const [recentFiles, setRecentFiles] = useState<string[]>(() => {
         try {
@@ -25,10 +33,11 @@ export const MainLayout: React.FC = () => {
     const [statusMsg, setStatusMsg] = useState('');
     const [aboutOpen, setAboutOpen] = useState(false);
     const [helpOpen, setHelpOpen] = useState(false);
-    const [version, setVersion] = useState('1.0.2');
+    const [version, setVersion] = useState('1.1.5');
     const [systemIsDark, setSystemIsDark] = useState(false);
     const [isDirty, setIsDirty] = useState(false);
     const [editor, setEditor] = useState<Editor | null>(null);
+    const [isJustLoaded, setIsJustLoaded] = useState(true);
     const [, setForceUpdate] = useState({});
     const [wordCount, setWordCount] = useState(0);
     const [lineCount, setLineCount] = useState(0);
@@ -40,12 +49,25 @@ export const MainLayout: React.FC = () => {
         initialValue: string;
         resolve: (val: string | null) => void;
     }>({ open: false, title: '', message: '', initialValue: '', resolve: () => { } });
+    const [confirmDialog, setConfirmDialog] = useState<{
+        open: boolean;
+        title: string;
+        message: string;
+        resolve: (val: boolean) => void;
+    }>({ open: false, title: '', message: '', resolve: () => { } });
+    const [linkDialog, setLinkDialog] = useState<{
+        open: boolean;
+        title: string;
+        initialText: string;
+        initialUrl: string;
+        resolve: (val: { text: string, url: string } | null) => void;
+    }>({ open: false, title: '', initialText: '', initialUrl: '', resolve: () => { } });
     const editorScrollRef = React.useRef<HTMLDivElement>(null);
 
     // Status bar enhancements
     const [cursorInfo, setCursorInfo] = useState({ line: 1, col: 1, selected: 0 });
     const [structureOpen, setStructureOpen] = useState(false);
-    const [headings, setHeadings] = useState<{ level: number; text: string; pos: number }[]>([]);
+    const [headings, setHeadings] = useState<{ level: number; text: string; pos: number; line: number }[]>([]);
 
     // Find/Replace state
     const [findReplaceOpen, setFindReplaceOpen] = useState(false);
@@ -85,27 +107,96 @@ export const MainLayout: React.FC = () => {
         setWordCount(matches ? matches.length : 0);
     }, []);
 
+    const handlePrompt = useCallback((title: string, message: string, initialValue: string = ''): Promise<string | null> => {
+        if (editor) editor.commands.blur();
+        return new Promise((resolve) => {
+            setInputDialog({
+                open: true,
+                title,
+                message,
+                initialValue,
+                resolve
+            });
+        });
+    }, []);
+
+    const handleLinkPrompt = useCallback((title: string, initialText: string = '', initialUrl: string = ''): Promise<{ text: string, url: string } | null> => {
+        if (editor) editor.commands.blur();
+        return new Promise((resolve) => {
+            setLinkDialog({
+                open: true,
+                title,
+                initialText,
+                initialUrl,
+                resolve
+            });
+        });
+    }, []);
+
+    const handleConfirm = useCallback((title: string, message: string): Promise<boolean> => {
+        return new Promise((resolve) => {
+            setConfirmDialog({
+                open: true,
+                title,
+                message,
+                resolve
+            });
+        });
+    }, []);
+
     // Initial word count when editor is first ready or file loaded
     useEffect(() => {
         if (editor) {
             updateCounts(editor.getText());
         }
     }, [editor, updateCounts]);
-
-    const handleNew = useCallback(() => {
+    const scrollToTop = useCallback(() => {
+        if (editorScrollRef.current) {
+            editorScrollRef.current.scrollTop = 0;
+        }
+    }, []);
+    const handleNew = useCallback(async () => {
+        if (isDirty) {
+            const confirmed = await handleConfirm(t('confirm.unsaved_changes_title'), t('confirm.unsaved_changes'));
+            if (!confirmed) return;
+        }
+        setIsJustLoaded(true);
         setContent('');
         setCurrentFile(null);
         setIsDirty(false);
         setWordCount(0);
         setLineCount(0);
-    }, []);
+        scrollToTop();
+    }, [isDirty, t, handleConfirm, scrollToTop]);
 
     // Wrapper passed to the editor — every editor-originated change marks the doc dirty
     const handleContentChange = useCallback((html: string, text: string) => {
         setContent(html);
-        setIsDirty(true);
+        if (isJustLoaded) {
+            setIsDirty(false);
+
+        } else {
+            setIsDirty(true);
+        }
+        setIsJustLoaded(false);
         updateCounts(text);
-    }, [updateCounts]);
+    }, [isJustLoaded, updateCounts]);
+
+    const handleUpdate = useCallback(() => {
+        if (!editor) return;
+
+        const newHeadings: { level: number; text: string; pos: number; line: number }[] = [];
+        const fullText = editor.getText();
+
+        editor.state.doc.descendants((node, pos) => {
+            if (node.type.name === 'heading') {
+                const textBefore = editor.state.doc.textBetween(0, pos, '\n');
+                const line = textBefore.split('\n').length;
+                newHeadings.push({ level: node.attrs.level, text: node.textContent, pos, line });
+            }
+        });
+        setHeadings(newHeadings);
+    }, [editor]);
 
     const handleSelectionUpdate = useCallback(() => {
         if (!editor) return;
@@ -124,17 +215,6 @@ export const MainLayout: React.FC = () => {
 
         setCursorInfo({ line, col, selected });
 
-        // Only update headings if structure menu might be opened soon or is open
-        // For performance, we could do this only when the menu opens,
-        // but doing it here ensures it's fresh.
-        const newHeadings: { level: number; text: string; pos: number }[] = [];
-        editor.state.doc.descendants((node, pos) => {
-            if (node.type.name === 'heading') {
-                newHeadings.push({ level: node.attrs.level, text: node.textContent, pos });
-            }
-        });
-        setHeadings(newHeadings);
-
         // Check if cursor moved outside the current search match
         if (findReplaceOpen && searchResults.length > 0 && currentSearchIndex >= 0) {
             const match = searchResults[currentSearchIndex];
@@ -145,29 +225,78 @@ export const MainLayout: React.FC = () => {
         }
         setFindBarInitialQuery(selectedText);
         setForceUpdate({});
-    }, [editor]);
+    }, [editor, findReplaceOpen, searchResults, currentSearchIndex]);
+
+    const loadFileByPath = useCallback(async (path: string) => {
+        if (isDirty) {
+            const confirmed = await handleConfirm(t('confirm.unsaved_changes_title'), t('confirm.unsaved_changes'));
+            if (!confirmed) return;
+        }
+        try {
+            const raw = await ReadFile(path);
+            const html = await MdToHtmlWithBase(raw, path);
+            setIsJustLoaded(true);
+            setContent(html);
+            setCurrentFile(path);
+            setIsDirty(false);
+            addRecentFile(path);
+            scrollToTop();
+        } catch (err: any) {
+            window.alert(t('error.loadRecentFile') || `Failed to open file:\n${path}\n\n${err.message || err}`);
+        }
+    }, [isDirty, t, handleConfirm, addRecentFile, scrollToTop]);
+
+    useEffect(() => {
+        SetDirty(isDirty);
+    }, [isDirty]);
+
+    useEffect(() => {
+        const quitOnOpenFile = EventsOn('open-file', (path: string) => {
+            loadFileByPath(path);
+        });
+
+        // Also check if there's a file path pending from startup
+        GetPendingFile().then((path: string) => {
+            if (path) {
+                loadFileByPath(path);
+            }
+        });
+
+        return () => {
+            quitOnOpenFile();
+        };
+    }, [loadFileByPath]);
 
     const handleOpen = useCallback(async () => {
+        if (isDirty) {
+            const confirmed = await handleConfirm(t('confirm.unsaved_changes_title'), t('confirm.unsaved_changes'));
+            if (!confirmed) return;
+        }
         const path = await OpenFileDialog();
         if (!path) return;
         const raw = await ReadFile(path);
         // Use MdToHtmlWithBase so relative image paths resolve correctly
         const html = await MdToHtmlWithBase(raw, path);
+        setIsJustLoaded(true);
         setContent(html);
         setCurrentFile(path);
         setIsDirty(false);
         addRecentFile(path);
-    }, []);
+        scrollToTop();
+    }, [isDirty, t, handleConfirm, addRecentFile, scrollToTop]);
 
     const handleReload = useCallback(async () => {
+        console.log('handleReload');
         if (!currentFile) return;
         if (isDirty) {
-            if (!window.confirm(t('confirm.reload'))) {
+            const confirmed = await handleConfirm(t('confirm.reload_title'), t('confirm.reload'));
+            if (!confirmed) {
                 return;
             }
         }
         const raw = await ReadFile(currentFile);
         const html = await MdToHtmlWithBase(raw, currentFile);
+        setIsJustLoaded(true);
         setContent(html);
         setIsDirty(false);
         showStatus(t('status.reloaded'));
@@ -198,42 +327,30 @@ export const MainLayout: React.FC = () => {
         }
         const md = await HtmlToMdForFile(content, currentFile);
         await SaveFile(currentFile, md);
+        setIsDirty(false);
         showStatus(t('status.saved'));
     }, [currentFile, content, t]);
 
-    // Robust scroll helper that finds the nearest element node and centers it in the scroll container
-    const scrollToPos = useCallback((pos: number, isBlockPos: boolean = false) => {
+
+
+    // Precise scroll helper using coordsAtPos for better accuracy especially near document end
+    const scrollToPos = useCallback((pos: number) => {
         if (!editor || !editorScrollRef.current) return;
         try {
-            let el: HTMLElement | null = null;
+            const { view } = editor;
+            const scrollContainer = editorScrollRef.current;
 
-            if (isBlockPos) {
-                // If we know this is a block document node position, we strictly request that node's DOM element directly
-                const domNode = editor.view.nodeDOM(pos);
-                if (domNode && domNode.nodeType === 1) {
-                    el = domNode as HTMLElement;
-                }
-            }
+            // coordsAtPos returns viewport-relative coordinates
+            const coords = view.coordsAtPos(pos);
+            const containerRect = scrollContainer.getBoundingClientRect();
 
-            if (!el) {
-                // For text positions or as fallback, use domAtPos and ascend to parent Element
-                let { node } = editor.view.domAtPos(pos);
-                while (node && node.nodeType !== 1) {
-                    node = node.parentNode as any;
-                }
-                el = node as HTMLElement;
-            }
+            // Distance from the top of the visible container to the target position
+            const currentRelativeTop = coords.top - containerRect.top;
 
-            if (el && el.getBoundingClientRect) {
-                const scrollContainer = editorScrollRef.current;
-                const containerRect = scrollContainer.getBoundingClientRect();
-                const elRect = el.getBoundingClientRect();
+            // Target scrollTop: current + (relative distance) - buffer (48px)
+            const targetScrollTop = scrollContainer.scrollTop + currentRelativeTop - 48;
 
-                // Calculate scroll distance to center the element
-                const targetScrollTop = scrollContainer.scrollTop + (elRect.top - containerRect.top) - (containerRect.height / 2) + (elRect.height / 2);
-
-                scrollContainer.scrollTo({ top: targetScrollTop, behavior: 'smooth' });
-            }
+            scrollContainer.scrollTo({ top: targetScrollTop, behavior: 'smooth' });
         } catch (e) {
             console.error("Failed to scroll to pos", e);
         }
@@ -429,17 +546,6 @@ export const MainLayout: React.FC = () => {
         }
     }, [config, updateConfig]);
 
-    const handlePrompt = useCallback((title: string, message: string, initialValue: string = ''): Promise<string | null> => {
-        return new Promise((resolve) => {
-            setInputDialog({
-                open: true,
-                title,
-                message,
-                initialValue,
-                resolve
-            });
-        });
-    }, []);
 
     if (!config || !config.layout || !config.editor) {
         return <div className="guimd-config-error">{t('error.config')}</div>;
@@ -460,27 +566,13 @@ export const MainLayout: React.FC = () => {
             ...recentFiles.map(p => ({
                 label: p.split(/[/\\]/).pop() ?? p,
                 title: p,
-                action: async () => {
-                    try {
-                        const raw = await ReadFile(p);
-                        const html = await MdToHtmlWithBase(raw, p);
-                        setContent(html);
-                        setCurrentFile(p);
-                        addRecentFile(p);
-                    } catch (err: any) {
-                        window.alert(t('error.loadRecentFile') || `Failed to open recent file:\n${p}\n\n${err.message || err}`);
-                        // Optionally remove the file from recent files
-                        setRecentFiles(prev => {
-                            const next = prev.filter(path => path !== p);
-                            localStorage.setItem('guimd-recent-files', JSON.stringify(next));
-                            return next;
-                        });
-                    }
-                },
+                icon: <FileText size={14} />,
+                action: () => loadFileByPath(p),
             })),
             { separator: true as const },
             {
                 label: t('menu.clearRecentFiles'),
+                icon: <Trash2 size={14} />,
                 action: () => {
                     setRecentFiles([]);
                     localStorage.removeItem('guimd-recent-files');
@@ -490,45 +582,50 @@ export const MainLayout: React.FC = () => {
 
     const menus = [
         {
-            label: t('menu.file'),
+            label: "",//t('menu.file'),
+            icon: <FilePlus size={14} />,
             items: [
-                { label: `${t('menu.new')}\t⌃N`, action: handleNew },
-                { label: `${t('menu.open')}\t⌃O`, action: handleOpen },
-                { label: t('menu.recentFiles'), items: recentFileItems },
+                { label: `${t('menu.new')}\t⌃N`, icon: <FilePlus size={14} />, action: handleNew },
+                { label: `${t('menu.open')}\t⌃O`, icon: <FolderOpen size={14} />, action: handleOpen },
+                { label: t('menu.recentFiles'), icon: <History size={14} />, items: recentFileItems },
                 { separator: true },
-                { label: `${t('menu.save')}\t⌃S`, action: handleSave },
-                { label: `${t('menu.saveAs')}\t⌃⇧S`, action: handleSaveAs },
+                { label: `${t('menu.save')}\t⌃S`, icon: <Save size={14} />, action: handleSave },
+                { label: `${t('menu.saveAs')}\t⌃⇧S`, icon: <Download size={14} />, action: handleSaveAs },
             ],
         },
         {
-            label: t('menu.view'),
+            label: "",//t('menu.view'),
+            icon: <Palette size={14} />,
             items: [
-                { label: `${t('menu.find') || 'Find/Replace'}\t⌃F`, action: () => setFindReplaceOpen(true) },
+                { label: `${t('menu.find') || 'Find/Replace'}\t⌃F`, icon: <Search size={14} />, action: () => setFindReplaceOpen(true) },
                 { separator: true },
                 {
                     label: t('menu.theme'),
+                    icon: <Palette size={14} />,
                     items: [
-                        { label: t('menu.theme.light'), action: () => handleThemeChange('light') },
-                        { label: t('menu.theme.dark'), action: () => handleThemeChange('dark') },
-                        { label: t('menu.theme.system'), action: () => handleThemeChange('system') },
-                        { label: t('menu.theme.epaper'), action: () => handleThemeChange('epaper') },
+                        { label: t('menu.theme.light'), icon: <Sun size={14} />, action: () => handleThemeChange('light') },
+                        { label: t('menu.theme.dark'), icon: <Moon size={14} />, action: () => handleThemeChange('dark') },
+                        { label: t('menu.theme.system'), icon: <Monitor size={14} />, action: () => handleThemeChange('system') },
+                        { label: t('menu.theme.epaper'), icon: <Feather size={14} />, action: () => handleThemeChange('epaper') },
                     ]
                 },
                 {
                     label: t('menu.language'),
+                    icon: <Languages size={14} />,
                     items: [
-                        { label: t('menu.language.en'), action: () => handleLanguageChange('en') },
-                        { label: t('menu.language.zh_tw'), action: () => handleLanguageChange('zh-TW') },
-                        { label: t('menu.language.de'), action: () => handleLanguageChange('de') },
+                        { label: t('menu.language.en'), icon: <Globe size={14} />, action: () => handleLanguageChange('en') },
+                        { label: t('menu.language.zh_tw'), icon: <Globe size={14} />, action: () => handleLanguageChange('zh-TW') },
+                        { label: t('menu.language.de'), icon: <Globe size={14} />, action: () => handleLanguageChange('de') },
                     ]
                 }
             ],
         },
         {
-            label: t('menu.help'),
+            label: "",//t('menu.help'),
+            icon: <HelpCircle size={14} />,
             items: [
-                { label: t('menu.about'), action: () => setAboutOpen(true) },
-                { label: t('menu.help_page'), action: () => setHelpOpen(true) },
+                { label: t('menu.about'), icon: <Info size={14} />, action: () => setAboutOpen(true) },
+                { label: t('menu.help_page'), icon: <HelpCircle size={14} />, action: () => setHelpOpen(true) },
             ],
         },
     ];
@@ -536,7 +633,6 @@ export const MainLayout: React.FC = () => {
     return (
         <div className={`guimd-layout ${themeClass}`}>
             <div className="guimd-header">
-                <div className="guimd-brand">Guimd</div>
                 <MenuBar menus={menus} />
                 {currentFile && (
                     <div className="guimd-header-info">
@@ -567,6 +663,8 @@ export const MainLayout: React.FC = () => {
                 onZoomIn={handleZoomIn}
                 onZoomOut={handleZoomOut}
                 onPrompt={handlePrompt}
+                onLinkPrompt={handleLinkPrompt}
+                currentFile={currentFile}
             />
 
             <div className={`guimd-workspace layout-${config.layout.type}`}>
@@ -580,10 +678,13 @@ export const MainLayout: React.FC = () => {
                     <MarkdownEditor
                         content={content}
                         onChange={handleContentChange}
+                        onUpdate={handleUpdate}
                         onSelectionUpdate={handleSelectionUpdate}
                         scrollRef={editorScrollRef}
                         onEditorReady={setEditor}
                         isViewMode={isViewMode}
+                        onPrompt={handlePrompt}
+                        currentFile={currentFile}
                     />
                     <FindReplaceDialog
                         open={findReplaceOpen}
@@ -674,25 +775,23 @@ export const MainLayout: React.FC = () => {
                                             e.stopPropagation();
                                             if (editor) {
                                                 setStructureOpen(false);
-
-                                                const headingText = h.text;
-                                                if (headingText) {
-                                                    // Set the query text and open the find bar
-                                                    setFindBarInitialQuery(headingText);
-                                                    setFindReplaceOpen(true);
-
-                                                    // Add a tiny delay to ensure the UI updates before firing the search
-                                                    setTimeout(() => {
-                                                        // Execute search for the exact heading text, matching case
-                                                        executeSearch(headingText, true, false);
-                                                    }, 50);
-                                                }
-                                            } else {
-                                                setStructureOpen(false);
+                                                // Place selection first
+                                                editor.commands.setTextSelection(h.pos);
+                                                // Focus the editor
+                                                editor.commands.focus();
+                                                // Then force our precise scroll
+                                                setTimeout(() => {
+                                                    scrollToPos(h.pos);
+                                                }, 10);
                                             }
                                         }}
                                     >
-                                        {h.text || `${t('structure.heading')} ${h.level}`}
+                                        <span className="guimd-structure-text">
+                                            {h.text || `${t('structure.heading')} ${h.level}`}
+                                        </span>
+                                        <span className="guimd-structure-line">
+                                            {t('status.line')} {h.line}
+                                        </span>
                                     </div>
                                 ))
                             )}
@@ -701,7 +800,15 @@ export const MainLayout: React.FC = () => {
                 </>
             )}
 
-            <AboutDialog open={aboutOpen} onClose={() => setAboutOpen(false)} version={version} />
+            <AboutDialog
+                open={aboutOpen}
+                onClose={() => setAboutOpen(false)}
+                version={version}
+                onCopy={(text) => {
+                    navigator.clipboard.writeText(text);
+                    showStatus(t('status.copied'));
+                }}
+            />
             <HelpDialog open={helpOpen} onClose={() => setHelpOpen(false)} />
             <InputDialog
                 open={inputDialog.open}
@@ -715,6 +822,33 @@ export const MainLayout: React.FC = () => {
                 onCancel={() => {
                     setInputDialog(prev => ({ ...prev, open: false }));
                     inputDialog.resolve(null);
+                }}
+            />
+            <ConfirmDialog
+                open={confirmDialog.open}
+                title={confirmDialog.title}
+                message={confirmDialog.message}
+                onConfirm={() => {
+                    setConfirmDialog(prev => ({ ...prev, open: false }));
+                    confirmDialog.resolve(true);
+                }}
+                onCancel={() => {
+                    setConfirmDialog(prev => ({ ...prev, open: false }));
+                    confirmDialog.resolve(false);
+                }}
+            />
+            <LinkDialog
+                open={linkDialog.open}
+                title={linkDialog.title}
+                initialText={linkDialog.initialText}
+                initialUrl={linkDialog.initialUrl}
+                onConfirm={(text, url) => {
+                    setLinkDialog(prev => ({ ...prev, open: false }));
+                    linkDialog.resolve({ text, url });
+                }}
+                onCancel={() => {
+                    setLinkDialog(prev => ({ ...prev, open: false }));
+                    linkDialog.resolve(null);
                 }}
             />
         </div>

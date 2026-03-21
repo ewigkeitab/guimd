@@ -2,24 +2,28 @@ package backend
 
 import (
 	"context"
-	"encoding/json"
 	"fmt"
-	"net/url"
 	"os"
+	"os/exec"
 	"path/filepath"
-	"regexp"
+
 	"runtime"
 	"strings"
 
+	"guimd/backend/internal/config"
 	"guimd/backend/internal/convert"
 	"guimd/backend/internal/file"
+	"guimd/backend/internal/i18n"
+	"guimd/backend/internal/pathutil"
 
 	wruntime "github.com/wailsapp/wails/v2/pkg/runtime"
 )
 
 // App struct
 type App struct {
-	ctx context.Context
+	ctx             context.Context
+	pendingFilePath string
+	isDirty         bool
 }
 
 // NewApp creates a new App application struct
@@ -31,6 +35,23 @@ func NewApp() *App {
 // so we can call the runtime methods
 func (a *App) Startup(ctx context.Context) {
 	a.ctx = ctx
+}
+
+// OnFileOpen is called when a file is opened via the OS (macOS)
+func (a *App) OnFileOpen(filePath string) {
+	if a.ctx != nil {
+		// If the app is already running, open the file in a new instance/window
+		a.NewWindow(filePath)
+	} else {
+		a.pendingFilePath = filePath
+	}
+}
+
+// GetPendingFile returns the file path that was requested to be opened before context was ready
+func (a *App) GetPendingFile() string {
+	path := a.pendingFilePath
+	a.pendingFilePath = ""
+	return path
 }
 
 // ReadFile reads the content of a file
@@ -45,50 +66,18 @@ func (a *App) SaveFile(path string, content string) error {
 
 // LoadConfig reads the default.json configuration
 func (a *App) LoadConfig() (map[string]interface{}, error) {
-	path := filepath.Join("config", "default.json")
-	content, err := os.ReadFile(path)
-	if err != nil {
-		return nil, err
-	}
-	var config map[string]interface{}
-	if err := json.Unmarshal(content, &config); err != nil {
-		return nil, err
-	}
-	return config, nil
+	return config.LoadConfig()
 }
 
 // SaveConfig updates the default.json configuration
-func (a *App) SaveConfig(config map[string]interface{}) error {
-	path := filepath.Join("config", "default.json")
-	data, err := json.MarshalIndent(config, "", "  ")
-	if err != nil {
-		return err
-	}
-	return os.WriteFile(path, data, 0644)
+func (a *App) SaveConfig(configData map[string]interface{}) error {
+	return config.SaveConfig(configData)
 }
 
 // LoadTranslations reads the corresponding language file from external/
 // Falls back to embedded English if file not found or on error.
 func (a *App) LoadTranslations(langCode string) (map[string]interface{}, error) {
-	switch langCode {
-	case "en-US", "en":
-		return defaultEnglish, nil
-	case "zh-TW", "zh_tw":
-		return traditionalChinese, nil
-	case "de":
-		return german, nil
-	}
-
-	path := filepath.Join("external", fmt.Sprintf("%s.json", langCode))
-	content, err := os.ReadFile(path)
-	if err != nil {
-		return defaultEnglish, nil
-	}
-	var translations map[string]interface{}
-	if err := json.Unmarshal(content, &translations); err != nil {
-		return defaultEnglish, nil
-	}
-	return translations, nil
+	return i18n.LoadTranslations(langCode)
 }
 
 // OpenFileDialog opens a native file picker and returns the selected file path
@@ -115,7 +104,7 @@ func (a *App) SaveFileDialog() (string, error) {
 
 // GetAppVersion returns the current application version string
 func (a *App) GetAppVersion() string {
-	return "1.0.2"
+	return "1.1.5"
 }
 
 // MdToHtml converts markdown to HTML
@@ -130,65 +119,86 @@ func (a *App) MdToHtmlWithBase(md string, filePath string) (string, error) {
 	if err != nil {
 		return "", err
 	}
-	baseDir := filepath.Dir(filePath)
-	// Replace src="relative/path" with src="file:///absolute/path"
-	re := regexp.MustCompile(`src="([^"]+)"`)
-	resolved := re.ReplaceAllStringFunc(html, func(match string) string {
-		sub := re.FindStringSubmatch(match)
-		if len(sub) < 2 {
-			return match
-		}
-		src := sub[1]
-		// Leave absolute URLs and file:// URIs unchanged
-		if strings.HasPrefix(src, "http://") || strings.HasPrefix(src, "https://") ||
-			strings.HasPrefix(src, "file://") || strings.HasPrefix(src, "data:") {
-			return match
-		}
-		// Resolve relative path to absolute
-		absPath := filepath.Join(baseDir, src)
-		// URL escape the path for use in the custom URI
-		escapedPath := url.PathEscape(absPath)
-		return fmt.Sprintf(`src="/wails-local-file/%s"`, escapedPath)
-	})
-	return resolved, nil
-}
-
-// reverseLocalFilePathsForDir rewrites src="/wails-local-file/<encoded>" back
-// to a path relative to fileDir when possible, otherwise falls back to the
-// decoded absolute path.
-func reverseLocalFilePathsForDir(html, fileDir string) string {
-	re := regexp.MustCompile(`src="/wails-local-file/([^"]+)"`)
-	return re.ReplaceAllStringFunc(html, func(match string) string {
-		sub := re.FindStringSubmatch(match)
-		if len(sub) < 2 {
-			return match
-		}
-		absPath, err := url.PathUnescape(sub[1])
-		if err != nil {
-			return match
-		}
-		if runtime.GOOS == "windows" {
-			absPath = strings.ReplaceAll(absPath, "/", "\\")
-		}
-		if fileDir != "" {
-			if rel, err := filepath.Rel(fileDir, absPath); err == nil {
-				// Convert to forward slashes for portable markdown output
-				return fmt.Sprintf(`src="%s"`, filepath.ToSlash(rel))
-			}
-		}
-		// Convert to forward slashes if desired, or keep absolute path as is
-		return fmt.Sprintf(`src="%s"`, filepath.ToSlash(absPath))
-	})
+	return pathutil.ResolveImagesInHtml(html, filePath), nil
 }
 
 // HtmlToMd converts HTML to markdown (absolute paths for images).
 func (a *App) HtmlToMd(html string) (string, error) {
-	return convert.HtmlToMd(reverseLocalFilePathsForDir(html, ""))
+	return convert.HtmlToMd(pathutil.ReverseLocalFilePathsInHtml(html, ""))
 }
 
 // HtmlToMdForFile converts HTML to markdown, restoring image paths relative
 // to the given file path so the saved markdown stays portable.
 func (a *App) HtmlToMdForFile(html, filePath string) (string, error) {
 	fileDir := filepath.Dir(filePath)
-	return convert.HtmlToMd(reverseLocalFilePathsForDir(html, fileDir))
+	return convert.HtmlToMd(pathutil.ReverseLocalFilePathsInHtml(html, fileDir))
+}
+
+// ResolveImagePath takes a platform-specific path (relative or absolute)
+// and returns the /wails-local-file/ URI for display in the editor.
+func (a *App) ResolveImagePath(baseFilePath, imgPath string) string {
+	return pathutil.ResolveImagePath(baseFilePath, imgPath)
+}
+
+// UnresolveImagePath takes a /wails-local-file/ URI and returns the absolute system path.
+// If it's not a wails path, it returns the input as is.
+func (a *App) UnresolveImagePath(wailsPath string) string {
+	return pathutil.UnresolveImagePath(wailsPath)
+}
+
+// GetRelativePath returns the relative path from baseDir to targetPath if possible,
+// otherwise returns the absolute path.
+func (a *App) GetRelativePath(baseFilePath, targetPath string) string {
+	return pathutil.GetRelativePath(baseFilePath, targetPath)
+}
+
+// NewWindow launches a new instance of the application
+func (a *App) NewWindow(filePath string) {
+	exe, err := os.Executable()
+	if err != nil {
+		fmt.Printf("Error getting executable path: %v\n", err)
+		return
+	}
+
+	var cmd *exec.Cmd
+	// On macOS, if we are running from an app bundle, use 'open -n' to force a new instance
+	if runtime.GOOS == "darwin" && strings.Contains(exe, ".app/Contents/MacOS/") {
+		appPath := strings.Split(exe, ".app/Contents/MacOS/")[0] + ".app"
+		args := []string{"-n", appPath}
+		if filePath != "" {
+			args = append(args, "--args", filePath)
+		}
+		cmd = exec.Command("open", args...)
+	} else {
+		if filePath != "" {
+			cmd = exec.Command(exe, filePath)
+		} else {
+			cmd = exec.Command(exe)
+		}
+	}
+
+	err = cmd.Start()
+	if err != nil {
+		fmt.Printf("Error starting new window: %v\n", err)
+	}
+}
+
+// SetDirty updates the application's dirty state from the frontend
+func (a *App) SetDirty(dirty bool) {
+	a.isDirty = dirty
+}
+
+// BeforeClose is called when the application is about to close.
+func (a *App) BeforeClose(ctx context.Context) bool {
+	if a.isDirty {
+		selection, _ := wruntime.MessageDialog(ctx, wruntime.MessageDialogOptions{
+			Type:          wruntime.QuestionDialog,
+			Title:         "Unsaved Changes",
+			Message:       "The file has unsaved changes. Are you sure you want to quit?",
+			DefaultButton: "No",
+			Buttons:       []string{"Yes", "No"},
+		})
+		return selection == "No"
+	}
+	return false
 }
