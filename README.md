@@ -1,4 +1,6 @@
 # Guimd:
+[![FOSSA Status](https://app.fossa.com/api/projects/git%2Bgithub.com%2Fewigkeitab%2Fguimd.svg?type=shield)](https://app.fossa.com/projects/git%2Bgithub.com%2Fewigkeitab%2Fguimd?ref=badge_shield)
+
 
 **Guimd** is a lightweight cross-platform Markdown editor designed for focusing on user writing experience.
 
@@ -87,6 +89,9 @@ This project is licensed under the **MIT License**.
 - **Full Open Source License Compliance Audit Report**
 
 * * *
+
+
+[![FOSSA Status](https://app.fossa.com/api/projects/git%2Bgithub.com%2Fewigkeitab%2Fguimd.svg?type=large)](https://app.fossa.com/projects/git%2Bgithub.com%2Fewigkeitab%2Fguimd?ref=badge_large)
 
 ## Release Notes
 
